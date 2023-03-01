@@ -1,4 +1,4 @@
 valuesFilePath: values.yml
 
 include:
-  template: myCompany/artifactCleanup/1.0.0
+  template: ride_beep/artifactCleanup/1.0.0
