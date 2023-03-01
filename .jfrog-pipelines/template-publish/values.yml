@@ -1,11 +1,11 @@
 templateRepository:
   gitProvider: myGitIntegration
-  path: "kunal-mazumdar/jfrog-pipelines"
+  path: kunal-mazumdar/jfrog-pipelines
   branch: master
   templateFolder: templates/artifactory/cleanup/artifact-cleanup
 
 publishTemplate:
-  namespace: myCompany
+  namespace: ride_beep
   name: artifactCleanup
   version: 1.0.0
   pipelineName: publish_artifact_cleanup_template
