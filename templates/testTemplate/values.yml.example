@@ -1,0 +1,7 @@
+mainService: "access"
+includedServices: "access"
+gitRepoPath: "infs/access"
+buildPipelineFirstStep: "trigger_all"
+serviceMilestoneCronInterval: ""
+servicePipelineSourceDir: ".jfrog-pipelines/server"
+jfdevCiCommonsDefaultVersion: 1.*
