@@ -1,0 +1,785 @@
+template:
+  namespace: ci-next-test-dev
+  name: release-pipelines-test
+  version: 1.2.3
+  development: true
+
+#the following parameters are controlled only by cicd team, therefore it is not in the values.yml file
+cicdParameters:
+  setupStepCommonsTaskVersion: &setupStepCommonsTaskVersion 'jfdev-ci-commons/setup-step-commons@latest'
+  pipelinesTriggerStepTaskVersion: &pipelinesTriggerStepTaskVersion 'jfdev-ci-commons/pipelines-trigger-step@latest'
+  pipelinesIntegration: &pipelinesIntegration entplus_pipelines
+  servicePreReleasesProcessGitRepoResource: &servicePreReleasesProcessGitRepoResource '{{ .Values.mainService }}_pre_releases_process_bitbucket'
+  serviceReleasesProcessGitRepoResource: &serviceReleasesProcessGitRepoResource '{{ .Values.mainService }}_releases_process_bitbucket'
+  servicePostReleaseGitRepoResource: &servicePostReleaseGitRepoResource '{{ .Values.mainService }}_release_bitbucket'
+  loadPreReleasesProcessStepCommonsFromTask: &loadPreReleasesProcessStepCommonsFromTask 'source "${res_{{ .Values.mainService }}_pre_releases_process_bitbucket_resourcePath}/${OUT_setup_step_commons_PIPE_STEP_COMMONS_PATH}"'
+  preReleasesProcessStepCommonsFromTask: &preReleasesProcessStepCommonsFromTask '"${res_{{ .Values.mainService }}_pre_releases_process_bitbucket_resourcePath}/${OUT_setup_step_commons_PIPE_STEP_COMMONS_PATH}"'
+  loadReleasesProcessStepCommonsFromTask: &loadReleasesProcessStepCommonsFromTask 'source "${res_{{ .Values.mainService }}_releases_process_bitbucket_resourcePath}/${OUT_setup_step_commons_PIPE_STEP_COMMONS_PATH}"'
+  releasesProcessStepCommonsFromTask: &releasesProcessStepCommonsFromTask '"${res_{{ .Values.mainService }}_releases_process_bitbucket_resourcePath}/${OUT_setup_step_commons_PIPE_STEP_COMMONS_PATH}"'
+  loadPostReleasesProcessStepCommonsFromTask: &loadPostReleasesProcessStepCommonsFromTask 'source "${res_{{ .Values.mainService }}_release_bitbucket_resourcePath}/${OUT_setup_step_commons_PIPE_STEP_COMMONS_PATH}"'
+  postReleasesProcessStepCommonsFromTask: &postReleasesProcessStepCommonsFromTask '"${res_{{ .Values.mainService }}_release_bitbucket_resourcePath}/${OUT_setup_step_commons_PIPE_STEP_COMMONS_PATH}"'
+  postReleasePipelineFirstStep: &postReleasePipelineFirstStep 'promote_builds_to_staging_milestone_repositories'
+  gitPushSshIntegration: &gitPushSshIntegration 'artifactory_bitbucket_push'
+
+# Repeated code sections
+commonExecutionSection: &commonExecutionSection
+    onSuccess:
+      - stepCommons_on_success || echo "[ERROR] stepCommons_on_success returned an error"
+    onFailure:
+      - stepCommons_on_failure || echo "[ERROR] stepCommons_on_failure returned an error"
+    onComplete:
+      - stepCommons_pre_on_complete || echo "[ERROR] stepCommons_pre_on_complete returned an error"
+      - stepCommons_on_complete || echo "[ERROR] stepCommons_on_complete returned an error"
+
+resources:
+  #prerelease
+  {{ if or (eq "{{gitBranch}}" "master") (hasPrefix "infra" "{{gitBranch}}") }}
+  - name: "{{ .Values.mainService }}_prerelease_test_retrigger"
+    type: PropertyBag
+    configuration:
+      prerelease_branch_name: ""
+  - name: *servicePreReleasesProcessGitRepoResource
+    type: GitRepo
+    configuration:
+      path: {{ .Values.gitRepoPath }}
+      gitProvider: JFrog_bitbucket
+      branches:
+        include: ^{{gitBranch}}$
+  {{ end }}
+
+  #release
+  {{ if or ( eq "{{gitBranch}}" "master" ) ( hasPrefix "preRelease" "{{gitBranch}}" ) ( hasPrefix "infra" "{{gitBranch}}" ) ( hasPrefix "feature" "{{gitBranch}}" ) ( hasPrefix "bugfix" "{{gitBranch}}" ) }}
+  - name: "{{ .Values.mainService }}_release_services_properties"
+    type: PropertyBag
+    configuration:
+      last_released_run_number: -1
+  - name: *serviceReleasesProcessGitRepoResource
+    type: GitRepo
+    configuration:
+      path: {{ .Values.gitRepoPath }}
+      gitProvider: JFrog_bitbucket
+      branches:
+        include: ^{{gitBranch}}$
+  {{ end }}
+
+  #cron milestone by interval, only on master. Be sure to remove trigger from jenkins job
+  - name: "{{ .Values.mainService }}_milestone_cron_trigger"
+    type: CronTrigger
+    configuration:
+      interval: {{ .Values.serviceMilestoneCronInterval }}
+      branches:
+        include: "^master$"
+
+  #global resources
+  - name: *servicePostReleaseGitRepoResource
+    type: GitRepo
+    configuration:
+      path: {{ .Values.gitRepoPath }}
+      gitProvider: JFrog_bitbucket
+      branches:
+        include: ^{{gitBranch}}$
+      buildOn:
+        commit: false
+
+pipelines:
+  #prerelease
+  {{ if or (eq "{{gitBranch}}" "master") (hasPrefix "infra" "{{gitBranch}}") }}
+  - name: "{{ .Values.mainService }}_prerelease"
+    configuration:
+      nodePool: ci_c5large
+      integrations:
+        - name: jfdev_agent
+        - name: entplus_deployer
+        - name: docker_jfrog_io_reader
+        - name: slack_platform_release_pipeline
+        - name: slack_dev_foundation_alerts
+        - name: entplus_jfrog_io_docker
+        - name: aws_build_nodes_metrics
+        - name: entplus_pipelines
+        - name: jira_jfrog
+      environmentVariables:
+        readOnly:
+          SUGGESTED_MAJOR:
+            default: ""
+            description: "[Required] Major version number for the new pre-release version (e.g. '7' in '7.25.x')"
+          SUGGESTED_MINOR:
+            default: ""
+            description: "[Required] Minor version number for the new pre-release version (e.g. '25' in '7.25.x')"
+          SKIP_STEP_STATUS_UPDATE:
+            default: "true"
+            description: "[DO_NOT_CHANGE] Skips step status update to bitbucket"
+            values:
+              - "true"
+              - "false"
+          SERVICES_TO_RELEASE:
+            default: {{ .Values.includedServices }}
+            values:
+              - {{ .Values.includedServices }}
+          SERVICE_DISPLAY_NAME:
+            default: {{ .Values.mainService }}
+            values:
+              - {{ .Values.mainService }}
+          SERVICE_INCLUDED_SERVICES:
+            default: {{ .Values.includedServices }}
+            values:
+              - {{ .Values.includedServices }}
+          SERVICE_BUILD_PIPELINE:
+            default: "{{ .Values.mainService }}_build"
+            values:
+              - "{{ .Values.mainService }}_build"
+          SERVICE_BUILD_PIPELINE_FIRST_STEP:
+            default: {{ .Values.buildPipelineFirstStep }}
+            values:
+              - {{ .Values.buildPipelineFirstStep }}
+          SERVICE_RELEASE_PIPELINE:
+            default: "{{ .Values.mainService }}_release"
+            values:
+              - "{{ .Values.mainService }}_release"
+          SERVICE_GIT_REPO_PATH:
+            default: {{ .Values.gitRepoPath }}
+            values:
+              - {{ .Values.gitRepoPath }}
+          PIPELINE_GIT_PUSH_SSH_INTEGRATION:
+            default: *gitPushSshIntegration
+            values:
+              - *gitPushSshIntegration
+          GIT_LFS_SKIP_SMUDGE:
+            default: "true"
+            description: "Git LFS skip the smudge process"
+          PIPELINE_ARTIFACTORY_INTEGRATION:
+            default: entplus_deployer
+            values:
+              - entplus_deployer
+          PIPELINE_RETRIGGER_PROPERTY_BAG:
+            default: "{{ .Values.mainService }}_prerelease_test_retrigger"
+            values:
+              - "{{ .Values.mainService }}_prerelease_test_retrigger"
+          SERVICE_PIPELINE_SOURCE_DIR:
+            default: {{ .Values.servicePipelineSourceDir }}
+            description: "The path to the current dir that this pipelines is located at."
+
+    steps:
+      - name: prepare_prerelease_pipeline
+        type: Bash
+        configuration:
+          priority: 1
+          inputResources:
+            - name: *servicePreReleasesProcessGitRepoResource
+              trigger: false
+          outputResources:
+            - name: "{{ .Values.mainService }}_prerelease_test_retrigger"
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *preReleasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadPreReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_prerelease.sh
+          onExecute:
+            - prepare_prerelease_pipeline_on_execute
+          <<: *commonExecutionSection
+
+      - name: create_branch_and_modify_prerelease_versions
+        type: Bash
+        configuration:
+          priority: 1
+          inputResources:
+            - name: *servicePreReleasesProcessGitRepoResource
+              trigger: false
+            - name: "{{ .Values.mainService }}_prerelease_test_retrigger"
+              trigger: false
+          integrations:
+            - name: *gitPushSshIntegration
+          inputSteps:
+            - name: prepare_prerelease_pipeline
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *preReleasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadPreReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_prerelease.sh
+            - create_prerelease_branch_on_start
+          onExecute:
+            - create_prerelease_branch_on_execute
+          <<: *commonExecutionSection
+
+      - name: resolve_jfdev_metadata
+        type: Bash
+        configuration:
+          inputResources:
+            - name: *servicePreReleasesProcessGitRepoResource
+              trigger: false
+          integrations:
+            - name: *gitPushSshIntegration
+          inputSteps:
+            - name: prepare_prerelease_pipeline
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *preReleasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadPreReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_prerelease.sh
+            - resolve_jfdev_metadata_on_start
+          onExecute:
+            - resolve_jfdev_metadata_on_execute
+          <<: *commonExecutionSection
+
+      - name: check_repositories_exist
+        type: Bash
+        configuration:
+          priority: 1
+          inputResources:
+            - name: *servicePreReleasesProcessGitRepoResource
+              trigger: false
+            - name: "{{ .Values.mainService }}_prerelease_test_retrigger"
+              trigger: false
+          inputSteps:
+            - name: create_branch_and_modify_prerelease_versions
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *preReleasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadPreReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_prerelease.sh
+            - check_repositories_exist_on_start
+          onExecute:
+            - check_repositories_exist_on_execute
+          <<: *commonExecutionSection
+
+      - name: wait_for_branch_sync
+        type: Bash
+        configuration:
+          priority: 1
+          inputResources:
+            - name: *servicePreReleasesProcessGitRepoResource
+              trigger: false
+            - name: "{{ .Values.mainService }}_prerelease_test_retrigger"
+              trigger: false
+          inputSteps:
+            - name: create_branch_and_modify_prerelease_versions
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *preReleasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadPreReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_prerelease.sh
+          onExecute:
+            - wait_for_branch_sync_on_execute
+          <<: *commonExecutionSection
+
+      - name: trigger_master_next_version_milestone
+        type: Bash
+        configuration:
+          priority: 1
+          inputResources:
+            - name: *servicePreReleasesProcessGitRepoResource
+              trigger: false
+          inputSteps:
+            - name: create_branch_and_modify_prerelease_versions
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *preReleasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadPreReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_prerelease.sh
+          onExecute:
+            - setup_trigger_master_next_version_milestone_on_execute
+            - exportPipelinesProjectKeyAndName
+            - task: *pipelinesTriggerStepTaskVersion
+              id: pipelines_trigger_step
+              input:
+                pipelinesIntegration: *pipelinesIntegration
+                pipelineNameToTrigger: "${SERVICE_RELEASE_PIPELINE}"
+                stepNameToTrigger: "${SERVICE_RELEASE_PIPELINE_FIRST_STEP}"
+                pipelineBranchNameToTrigger: "${SERVICE_RELEASE_PIPELINE_BRANCH}"
+                pipelineTriggerBody: "${PIPELINES_TRIGGER_BODY}"
+                pipelineProjectKey: "${REMOTE_PIPELINE_PROJECT_KEY}"
+                pipelineProjectName: "${REMOTE_PIPELINE_PROJECT_NAME}"
+          onSuccess:
+            - trigger_master_next_version_milestone_on_success || echo "[ERROR] trigger_master_next_version_milestone_on_success returned an error"
+            - stepCommons_on_success || echo "[ERROR] stepCommons_on_success returned an error"
+          onFailure:
+            - stepCommons_on_failure || echo "[ERROR] stepCommons_on_failure returned an error"
+          onComplete:
+            - stepCommons_pre_on_complete || echo "[ERROR] stepCommons_pre_on_complete returned an error"
+            - stepCommons_on_complete || echo "[ERROR] stepCommons_on_complete returned an error"
+
+      - name: trigger_all_prerelease_branch_build
+        type: Bash
+        configuration:
+          priority: 1
+          inputResources:
+            - name: *servicePreReleasesProcessGitRepoResource
+              trigger: false
+            - name: "{{ .Values.mainService }}_prerelease_test_retrigger"
+              trigger: false
+          inputSteps:
+            - name: check_repositories_exist
+            - name: wait_for_branch_sync
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *preReleasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadPreReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_prerelease.sh
+          onExecute:
+            - exportPipelinesProjectKeyAndName
+            - task: *pipelinesTriggerStepTaskVersion
+              id: pipelines_trigger_step
+              input:
+                pipelinesIntegration: *pipelinesIntegration
+                pipelineNameToTrigger: "${SERVICE_BUILD_PIPELINE}"
+                stepNameToTrigger: {{ .Values.buildPipelineFirstStep }}
+                pipelineBranchNameToTrigger: "${PRERELEASE_BRANCH_NAME:-${!res_${PIPELINE_RETRIGGER_PROPERTY_BAG}_prerelease_branch_name}}"
+                pipelineTriggerBody: ""
+                pipelineProjectKey: "${REMOTE_PIPELINE_PROJECT_KEY}"
+                pipelineProjectName: "${REMOTE_PIPELINE_PROJECT_NAME}"
+          onSuccess:
+            - trigger_all_prerelease_branch_build_on_success || echo "[ERROR] trigger_all_prerelease_branch_build_on_success returned an error"
+            - stepCommons_on_success || echo "[ERROR] stepCommons_on_success returned an error"
+          onFailure:
+            - stepCommons_on_failure || echo "[ERROR] stepCommons_on_failure returned an error"
+          onComplete:
+            - stepCommons_pre_on_complete || echo "[ERROR] stepCommons_pre_on_complete returned an error"
+            - stepCommons_on_complete || echo "[ERROR] stepCommons_on_complete returned an error"
+  {{ end }}
+
+  # release
+  {{ if or ( eq "{{gitBranch }}" "master" ) ( hasPrefix "preRelease" "{{gitBranch}}" ) ( hasPrefix "infra" "{{gitBranch}}" ) ( hasPrefix "feature" "{{gitBranch}}" ) ( hasPrefix "bugfix" "{{gitBranch}}" ) }}
+  - name: "{{ .Values.mainService }}_release"
+    configuration:
+      nodePool: ci_c5large
+      integrations:
+        - name: jfdev_agent
+        - name: entplus_deployer
+        - name: docker_jfrog_io_reader
+        - name: slack_platform_release_pipeline
+        - name: slack_dev_foundation_alerts
+        - name: entplus_jfrog_io_docker
+        - name: aws_build_nodes_metrics
+        - name: entplus_pipelines
+      environmentVariables:
+        readOnly:
+          CI:
+            default: "true"
+            description: "[DO_NOT_CHANGE] disables interactive prompts and progress bar for the JFrog CLI"
+          SKIP_STEP_STATUS_UPDATE:
+            default: "true"
+            description: "[DO_NOT_CHANGFE] Skips step status update to bitbucket"
+            values:
+              - "true"
+              - "false"
+          SERVICES_TO_RELEASE:
+            default: {{ .Values.includedServices }}
+            values:
+              - {{ .Values.includedServices }}
+          PIPELINE_GIT_PUSH_SSH_INTEGRATION:
+            default: *gitPushSshIntegration
+            values:
+              - *gitPushSshIntegration
+          SERVICE_GIT_REPO_PATH:
+            default: {{ .Values.gitRepoPath }}
+            values:
+              - {{ .Values.gitRepoPath }}
+          GIT_LFS_SKIP_SMUDGE:
+            default: "true"
+            description: "Git LFS skip the smudge process"
+          SERVICE_DISPLAY_NAME:
+            default: {{ .Values.mainService }}
+            values:
+              - {{ .Values.mainService }}
+          SERVICE_BUILD_PIPELINE:
+            default: "{{ .Values.mainService }}_build"
+            values:
+              - "{{ .Values.mainService }}_build"
+          SERVICE_POST_RELEASE_PIPELINE:
+            default: "{{ .Values.mainService }}_post_release"
+            values:
+              - "{{ .Values.mainService }}_post_release"
+    {{ if ( eq "{{gitBranch }}" "master" ) }}
+          RELEASE_MINOR:
+            default: "false"
+            description: "Compute the next version as a minor"
+            values:
+              - "true"
+              - "false"
+    {{ end }}
+          SERVICE_BUILD_PIPELINE_FIRST_STEP:
+            description: "Defining the first step of the Build Pipeline"
+            default: {{ .Values.buildPipelineFirstStep }}
+            values:
+              - {{ .Values.buildPipelineFirstStep }}
+              - trigger_post_release
+          MILESTONE_TAG:
+            default: ""
+            values:
+              - ""
+              - "false"
+            description: "[MANDATORY]: Flag to determine the type of the release, options are:<br>
+                  release a milestone) Value should be an empty string<br>
+                  release an official version from a milestone) Value should be set to the milestone tag (e.g artifactory/7.24.0-m013) you aim to release from (will shorten the release cycle)<br>
+                  release an official version without a milestone) Value should be set to false"
+            allowCustom: true
+          SKIP_PROMOTION_ERRORS:
+            default: "false"
+            description: "Skip issues during promotion checks except milestone branches"
+            values:
+              - "true"
+              - "false"
+
+    steps:
+      - name: prepare_release_branch
+        type: Bash
+        configuration:
+          affinityGroup: release_group
+          priority: 1
+          inputResources:
+            - name: *serviceReleasesProcessGitRepoResource
+              trigger: false
+            - name: "{{ .Values.mainService }}_milestone_cron_trigger"
+              trigger: true
+          integrations:
+            - name: *gitPushSshIntegration
+          outputResources:
+            - name: "{{ .Values.mainService }}_release_services_properties"
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *releasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_release.sh
+            - blockReleaseInCaseLatestMilestoneIs999
+            - create_release_branch_on_start_new
+          onExecute:
+            - create_release_branch_on_execute
+            - select_release_versions_on_execute
+            - modify_metadata_files_commit_and_push
+            - check_if_tag_already_exists
+          <<: *commonExecutionSection
+
+      - name: wait_for_branch_sync
+        type: Bash
+        configuration:
+          affinityGroup: release_group
+          priority: 1
+          inputResources:
+            - name: *serviceReleasesProcessGitRepoResource
+              trigger: false
+            - name: "{{ .Values.mainService }}_release_services_properties"
+              newVersionOnly: true
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *releasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_release.sh
+            - wait_for_branch_sync_on_start
+          onExecute:
+            - wait_for_branch_sync_on_execute
+          <<: *commonExecutionSection
+
+      - name: build_release_artifacts
+        type: TriggerPipeline
+        configuration:
+          affinityGroup: release_group
+          priority: 1
+          inputResources:
+            - name: *serviceReleasesProcessGitRepoResource
+              trigger: false
+            - name: "{{ .Values.mainService }}_release_services_properties"
+              newVersionOnly: true
+          inputSteps:
+            - name: wait_for_branch_sync
+          environmentVariables:
+            JFDEV_CI_COMMONS_VERSION: ${JFDEV_CI_COMMONS_VERSION}
+          pipelineName: "{{ .Values.mainService }}_build"
+          stepName: ${BUILD_PIPELINE_FIRST_STEP}
+          branchName: ${AD_HOC_RELEASE_BRANCH_NAME}
+          integrations:
+            - name: jfrog_platform_embedded_pipelines
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *releasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_release.sh
+            - build_release_artifacts_on_start
+          <<: *commonExecutionSection
+
+      - name: post_release_actions
+        type: TriggerPipeline
+        configuration:
+          affinityGroup: release_group
+          priority: 1
+          inputResources:
+            - name: *serviceReleasesProcessGitRepoResource
+              trigger: false
+            - name: "{{ .Values.mainService }}_release_services_properties"
+              newVersionOnly: true
+          inputSteps:
+            - name: build_release_artifacts
+          environmentVariables:
+            JFDEV_CI_COMMONS_VERSION: ${JFDEV_CI_COMMONS_VERSION}
+          pipelineName: "{{ .Values.mainService }}_post_release"
+          stepName: *postReleasePipelineFirstStep
+          branchName: ${AD_HOC_RELEASE_BRANCH_NAME}
+          integrations:
+            - name: jfrog_platform_embedded_pipelines
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *releasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_release.sh
+            - post_release_actions_on_start
+          <<: *commonExecutionSection
+  {{end}}
+
+  # postRelease pipeline - available for adhoc branches only ((release|milestone)/<short-name>-<timestamp>-<source-branch>)
+  {{ if or ( hasPrefix "release" "{{gitBranch}}" ) ( hasPrefix "milestone" "{{gitBranch}}" ) }}
+  - name: "{{ .Values.mainService }}_post_release"
+    configuration:
+      nodePool: ci_c5large
+      integrations:
+        - name: jfdev_agent
+        - name: entplus_deployer
+        - name: docker_jfrog_io_reader
+        - name: slack_platform_release_pipeline
+        - name: slack_dev_foundation_alerts
+        - name: entplus_jfrog_io_docker
+        - name: aws_build_nodes_metrics
+        - name: entplus_pipelines
+        - name: pact_broker
+        - name: jira_jfrog
+      environmentVariables:
+        readOnly:
+          SERVICE_INCLUDED_SERVICES:
+            default: {{ .Values.includedServices }}
+          SKIP_STEP_STATUS_UPDATE:
+            default: "true"
+            description: "[DO_NOT_CHANGE] Skips step status update to bitbucket"
+            values:
+              - "true"
+              - "false"
+          PIPELINE_GIT_PUSH_SSH_INTEGRATION:
+            default: *gitPushSshIntegration
+            values:
+              - *gitPushSshIntegration
+          GIT_LFS_SKIP_SMUDGE:
+            default: "true"
+            description: "Git LFS skip the smudge process"
+          SKIP_PROMOTION_ERRORS:
+            default: "false"
+            description: "Skip issues during promotion checks except milestone branches"
+            values:
+              - "true"
+              - "false"
+    steps:
+      - name: promote_builds_to_staging_milestone_repositories
+        type: Bash
+        configuration:
+          affinityGroup: post_release_group
+          priority: 1
+          inputResources:
+            - name: *servicePostReleaseGitRepoResource
+              trigger: false
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *postReleasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadPostReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_post_release.sh
+            - post_release_on_start
+          onExecute:
+            - promoteMilestone_on_execute
+          <<: *commonExecutionSection
+
+      - name: tag_releases
+        type: Bash
+        configuration:
+          priority: 1
+          affinityGroup: post_release_group
+          inputResources:
+            - name: *servicePostReleaseGitRepoResource
+              trigger: false
+          inputSteps:
+            - name: promote_builds_to_staging_milestone_repositories
+          integrations:
+            - name: artifactory_bitbucket_push
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *postReleasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadPostReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_post_release.sh
+            - post_release_on_start
+            - tag_releases_on_start
+          onExecute:
+            - tag_releases_on_execute
+          <<: *commonExecutionSection
+
+    {{ if hasPrefix "release" "{{gitBranch}}" }}
+      - name: promote_builds_to_release_repositories
+        type: Bash
+        configuration:
+          priority: 1
+          affinityGroup: post_release_group
+          inputSteps:
+            - name: tag_releases
+          inputResources:
+            - name: *servicePostReleaseGitRepoResource
+              trigger: false
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *postReleasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadPostReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_post_release.sh
+            - post_release_on_start
+            - promoteRelease_on_start
+          onExecute:
+            - promoteRelease_on_execute
+          <<: *commonExecutionSection
+    {{end}}
+    {{ if and ( hasPrefix "release" "{{gitBranch}}" ) (or (eq .Values.mainService "artifactory_product") (eq .Values.mainService "ci_next_sandbox")) }}
+      - name: artifactory_product_version
+        type: Bash
+        configuration:
+          inputResources:
+            - name: *servicePostReleaseGitRepoResource
+              trigger: false
+          inputSteps:
+            - name: promote_builds_to_release_repositories
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.taskUtils.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *postReleasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadPostReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_post_release.sh
+            - post_release_on_start
+          onExecute:
+            - artifactory_product_version_tagging
+          <<: *commonExecutionSection
+    {{end}}
+    {{ if hasPrefix "release" "{{gitBranch}}" }}
+      - name: release_board_automation
+        type: Bash
+        configuration:
+          inputResources:
+            - name: *servicePostReleaseGitRepoResource
+              trigger: false
+          inputSteps:
+            - name: promote_builds_to_release_repositories
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.taskUtils.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *postReleasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadPostReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_post_release.sh
+            - post_release_on_start
+          onExecute:
+            - release_board_automation
+          <<: *commonExecutionSection
+
+    {{ if not (eq .Values.mainService "artifactory_product") }}
+      - name: release_jira_object
+        type: Bash
+        configuration:
+          inputResources:
+            - name: *servicePostReleaseGitRepoResource
+              trigger: false
+          inputSteps:
+            - name: promote_builds_to_release_repositories
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *postReleasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadPostReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_post_release.sh
+            - post_release_on_start
+          onExecute:
+            - release_jira_object
+          <<: *commonExecutionSection
+    {{end}}
+    {{end}}
+
+      - name: post_successful_release_steps
+        type: Bash
+        configuration:
+          inputResources:
+            - name: *servicePostReleaseGitRepoResource
+              trigger: false
+          inputSteps:
+      {{ if and ( hasPrefix "release" "{{gitBranch}}" ) (or (eq .Values.mainService "artifactory_product") (eq .Values.mainService "ci_next_sandbox")) }}
+            - name: artifactory_product_version
+      {{end}}
+      {{ if hasPrefix "release" "{{gitBranch}}" }}
+            - name: release_board_automation
+            - name: release_jira_object
+      {{else}}
+            - name: tag_releases
+      {{end}}
+        execution:
+          onStart:
+            - task: *setupStepCommonsTaskVersion
+              input:
+                JFDEV_CI_COMMONS_DEFAULT_VERSION: {{ .Values.taskUtils.jfdevCiCommonsDefaultVersion }}
+                PROJECT_ROOT_DIR: *postReleasesProcessStepCommonsFromTask
+              id: setup_step_commons
+            - *loadPostReleasesProcessStepCommonsFromTask
+            - stepCommons_load_script build/ci/scripts/pipelines_post_release.sh
+            - post_release_on_start
+          onExecute:
+            - post_successful_release_steps_on_execute_new
+          <<: *commonExecutionSection
+    {{ end }}
