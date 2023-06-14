@@ -2,7 +2,7 @@ templateRepository:
   gitProvider: myGitIntegration
   path: kunal-mazumdar/jfrog-pipelines
   branch: main
-  templateFolder: artifactory/cleanup/artifact-cleanup
+  templateFolder: templates/artifactory/cleanup/artifact-cleanup
 
 publishTemplate:
   namespace: kunal
