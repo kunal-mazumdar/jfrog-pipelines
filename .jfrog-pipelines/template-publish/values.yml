@@ -3,6 +3,7 @@ templateRepository:
   path: kunal-mazumdar/jfrog-pipelines
   branch: main
   templateFolder: templates/artifactory/cleanup/artifact-cleanup
+  autoPublishOnTemplateChange: false
 
 publishTemplate:
   namespace: kunal
