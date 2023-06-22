@@ -1,4 +1,4 @@
-# JFrog Pipelines Template - Artifactory Artifacts Cleanup
+# JFrog Pipelines Template - Artifactory Artifacts Cleanup :)
 
 This template deletes all artifacts that have not been downloaded for the past *n time units* or have been created prior to *n time units* which is by default 1 month. It can be run manually by triggering a Pipeline, or automatically as a scheduled job.
 
