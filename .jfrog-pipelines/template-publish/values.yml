@@ -1,7 +1,6 @@
 templateRepository:
   gitProvider: myGitIntegration
   path: kunal-mazumdar/jfrog-pipelines
-  branch: main
   templateFolder: templates/artifactory/cleanup/artifact-cleanup
   autoPublishOnTemplateChange: true
 
