@@ -3,7 +3,7 @@
 namePrefix: npm_template
  
 ## The name of your Artifactory integration
-artIntegration: myArtIntegration
+artIntegration: myArt
  
 ##### Artifactory Build Info
 ## set this to `true` to publish a build
@@ -17,8 +17,8 @@ artIntegration: myArtIntegration
  
 ##### Repository Details
 repo:
-  path: jfrog/jfrog-pipelines
-  gitIntegration: myGitIntegration
+  path: kunal-mazumdar/jfrog-pipelines
+  gitIntegration: kunal_gh
   branchPattern: "^project_files$"
  
 npmConfig:
