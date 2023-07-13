@@ -35,6 +35,13 @@ resources:
       lintStatus: ''
       buildStatus: ''
       publishStatus: ''
+  
+  - name: java_test_app_build_info
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: {{ .jfrog-pipelines.localArtifactory }}
+      buildName: java_test_app
+      buildNumber: ${run_id}
 
 pipelines:
   - name: java_template_pipeline
@@ -108,6 +115,7 @@ pipelines:
                 - success
           outputResources:
             - name: build_result
+            - name: java_test_app_build_info
         execution:
           onExecute:
             - echo 'Publising...'
