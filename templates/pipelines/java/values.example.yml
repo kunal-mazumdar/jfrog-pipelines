@@ -1,0 +1,19 @@
+metadata:
+  # [Optional]
+  namePrefix:  test_
+
+input:
+  # [Required]
+  sourceRepository:
+    # {{ ... Support all the Git Resource configuration properties ... }}
+
+  integrations:
+    # [Required]
+    jfrogToken: jf_token
+
+controls:
+
+  # [Optional] When defined with enabled: true then new Cron will be setup. Default expression: 0 0 5 ? * 1
+  cron:
+    enabled: false
+    expression: "*/3 * * * *"

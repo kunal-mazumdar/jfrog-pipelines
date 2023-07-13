@@ -1,0 +1,107 @@
+# TODOs:
+# - Validate required values 
+
+resources:
+  - name: git_source
+    type: GitRepo
+    configuration:
+      path: kunal-mazumdar/jfrog-pipelines
+      gitProvider: kunal_gh
+      branches:
+        include: main
+
+  - name: frogbot_scan_result
+    type: PropertyBag
+    configuration:
+      timestamp: ''
+      reportUrl: ''
+
+  - name: code_quality_result
+    type: PropertyBag
+    configuration:
+      timestamp: ''
+      reportUrl: ''
+  
+  - name: unit_test_result
+    type: PropertyBag
+    configuration:
+      timestamp: ''
+      status: ''
+
+  - name: build_result
+    type: PropertyBag
+    configuration:
+      timestamp: ''
+      lintStatus: ''
+      buildStatus: ''
+      publishStatus: ''
+
+pipelines:
+  - name: java_pipeline
+    configuration:      
+      inputResources:
+        - name: git_source
+    steps:
+      - name: frogbot_scan
+        type: Bash
+        configuration:
+          outputResources:
+            - name: frogbot_scan_result
+        execution:          
+          onExecute:
+            - echo 'Executing Frogbot scan...'
+
+      - name: code_quality
+        type: Bash
+        configuration:
+          outputResources:
+            - name: code_quality_result
+        execution:          
+          onExecute:
+            - echo 'Executing sonar...'
+
+      - name: unit_tests
+        type: Bash
+        configuration:
+          outputResources:
+            - name: unit_test_result
+        execution:          
+          onExecute:
+            - echo 'Linting...'
+
+      - name: lint
+        type: Bash
+        configuration:
+          outputResources:
+            - name: build_result
+        execution:          
+          onExecute:
+            - echo 'Linting...'
+
+      - name: build
+        type: Bash
+        configuration:
+          affinityGroup: build
+          inputSteps:
+            - name: lint
+              status:
+                - success
+          outputResources:
+            - name: build_result
+        execution:
+          onExecute:
+            - echo 'Building...'
+
+      - name: publish
+        type: Bash
+        configuration:
+          affinityGroup: build
+          inputSteps:
+            - name: build
+              status:
+                - success
+          outputResources:
+            - name: build_result
+        execution:
+          onExecute:
+            - echo 'Publising...'
