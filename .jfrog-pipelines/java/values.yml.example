@@ -1,19 +1,84 @@
+# [Optional]
 metadata:
   # [Optional]
   namePrefix:  test_
 
-input:
+# [Required]
+inputs:
   # [Required]
   sourceRepository:
     # {{ ... Support all the Git Resource configuration properties ... }}
 
   integrations:
     # [Required]
-    jfrogToken: jf_token
+    artifactoryToken: jf_token
+
+# [Required]
+configurations:
+
+  # [Optional] Defaults to Maven
+  buildTool: 'Maven/Gradle/Other'
+
+  # [Optional] Defaults to repository root folder
+  sourceDirectory: '.'
+
+  # [Optional] When buildTool = Maven/Gradle
+  # [Required] When buildTool = Other
+  commands:
+
+    lint:
+      command: 'mvn clean checkstyle:checkstyle' # Default to plugin: maven-checkstyle-plugin
+      # command: './gradlew lint'
+
+    test:
+      command: 'mvn test' # Default to plugin: maven-surefire-plugin
+      # command: './gradlew test'
+
+    build:
+      command: 'mvn -Dmaven.test.skip=true build' # Default to plugin: maven-compiler-plugin
+      # command: './gradlew clean build -x test'
+
+    deploy:
+      command: 'mvn deploy' # Default to plugin: maven-deploy-plugin
+      # command: './gradlew deploy'
 
 controls:
+  
+  # [Optional]
+  triggerBy:
+    
+    # Connected source Git repository change [Defaults to true]
+    sourceRepository: true
+    
+    # Other resource change from other pipelines
+    externalResources:
+      - resource: other_java_pipeline_resource
+    
+    # Automated periodic triggers (eg: Nightly builds)
+    cron:
+      enable: false
+      expression: "*/3 * * * *"
 
-  # [Optional] When defined with enabled: true then new Cron will be setup. Default expression: 0 0 5 ? * 1
-  cron:
-    enabled: false
-    expression: "*/3 * * * *"
+  # [Optional]
+  logging:
+
+    # [Optional] Defaults to false
+    enableDebug: true
+
+  # [Optional] Exporting important files during run as RUN FILES
+  export:
+
+    # [Optional] Defaults to false
+    lintReport:
+      enable: true
+      reportPath: ''
+    
+    # [Optional] Defaults to false
+    unitTestReport:
+      enable: true
+      reportPath: ''
+
+    # [Optional] Defaults to false  
+    codeQualityReport:
+      enable: true
+      reportPath: ''
