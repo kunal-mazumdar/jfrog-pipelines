@@ -37,7 +37,7 @@ resources:
       publishStatus: ''
 
 pipelines:
-  - name: java_pipeline
+  - name: java_template_pipeline
     configuration:      
       inputResources:
         - name: git_source
