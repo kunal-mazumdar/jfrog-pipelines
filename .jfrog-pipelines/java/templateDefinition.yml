@@ -39,19 +39,23 @@ resources:
   - name: java_test_app_build_info
     type: BuildInfo
     configuration:
-      sourceArtifactory: {{ .jfrog-pipelines.localArtifactory }}
+      sourceArtifactory: myArt
       buildName: java_test_app
       buildNumber: ${run_id}
 
 pipelines:
   - name: java_template_pipeline
     configuration:      
-      inputResources:
-        - name: git_source
+      environmentVariables:
+        readOnly:
+          ENABLE_DEBUG_LOGS: 'false'
+          SKIP_FROGBOT_SCAN: 'false'
     steps:
       - name: frogbot_scan
         type: Bash
         configuration:
+          inputResources:
+            - name: git_source
           outputResources:
             - name: frogbot_scan_result
         execution:          
@@ -63,6 +67,8 @@ pipelines:
         configuration:
           inputSteps:
             - name: frogbot_scan
+          inputResources:
+            - name: git_source        
           outputResources:
             - name: code_quality_result
         execution:          
@@ -74,6 +80,8 @@ pipelines:
         configuration:
           inputSteps:
             - name: frogbot_scan
+          inputResources:
+            - name: git_source  
           outputResources:
             - name: unit_test_result
         execution:          
@@ -83,8 +91,11 @@ pipelines:
       - name: lint
         type: Bash
         configuration:
+          affinityGroup: build
           inputSteps:
             - name: frogbot_scan
+          inputResources:
+            - name: git_source  
           outputResources:
             - name: build_result
         execution:          
