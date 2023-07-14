@@ -1,8 +1,7 @@
 # TODOs:
 # - Validate required values 
 
-{{ $customer := printf "%s/%s" "string1" "string2" }}
-{{ $GIT_RESOURCE_NAME := {.values.metadata.namePrefix} + "git_source" }}
+{{ $GIT_RESOURCE_NAME := printf "%s/%s" {{.values.metadata.namePrefix}} "git_source" }}
 
 valuesFilePath: values.yml
 
