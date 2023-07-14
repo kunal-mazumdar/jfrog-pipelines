@@ -1,8 +1,12 @@
 # TODOs:
 # - Validate required values 
 
+{{ $GIT_RESOURCE_NAME := .values.metadata.namePrefix + 'git_source' }}
+
+valuesFilePath: values.yml
+
 resources:
-  - name: git_source
+  - name: {{ $GIT_RESOURCE_NAME }}
     type: GitRepo
     configuration:
       path: kunal-mazumdar/jfrog-pipelines
@@ -55,7 +59,7 @@ pipelines:
         type: Bash
         configuration:
           inputResources:
-            - name: git_source
+            - name: {{ $GIT_RESOURCE_NAME }}
           outputResources:
             - name: frogbot_scan_result
         execution:          
@@ -68,7 +72,7 @@ pipelines:
           inputSteps:
             - name: frogbot_scan
           inputResources:
-            - name: git_source        
+            - name: {{ $GIT_RESOURCE_NAME }}        
           outputResources:
             - name: code_quality_result
         execution:          
@@ -81,7 +85,7 @@ pipelines:
           inputSteps:
             - name: frogbot_scan
           inputResources:
-            - name: git_source  
+            - name: {{ $GIT_RESOURCE_NAME }}  
           outputResources:
             - name: unit_test_result
         execution:          
@@ -95,7 +99,7 @@ pipelines:
           inputSteps:
             - name: frogbot_scan
           inputResources:
-            - name: git_source  
+            - name: {{ $GIT_RESOURCE_NAME }}  
           outputResources:
             - name: build_result
         execution:          

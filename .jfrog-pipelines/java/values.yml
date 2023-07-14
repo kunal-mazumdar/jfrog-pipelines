@@ -1,7 +1,7 @@
 # [Optional]
 metadata:
   # [Optional]
-  namePrefix:  test_
+  namePrefix:  homepage_app_
 
 # [Required]
 inputs:
@@ -30,17 +30,29 @@ configurations:
       command: 'mvn clean checkstyle:checkstyle' # Default to plugin: maven-checkstyle-plugin
       # command: './gradlew lint'
 
+      # [Optional] Default to false
+      skip: false
+
     test:
       command: 'mvn test' # Default to plugin: maven-surefire-plugin
       # command: './gradlew test'
+
+      # [Optional] Default to false
+      skip: false
 
     build:
       command: 'mvn -Dmaven.test.skip=true build' # Default to plugin: maven-compiler-plugin
       # command: './gradlew clean build -x test'
 
-    deploy:
+      # [Optional] Default to false
+      skip: false
+
+    publish:
       command: 'mvn deploy' # Default to plugin: maven-deploy-plugin
       # command: './gradlew deploy'
+      
+      # [Optional] Default to false
+      skip: false
 
 controls:
   
