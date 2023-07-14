@@ -1,7 +1,7 @@
 # [Optional]
 metadata:
   # [Optional]
-  appName:  homepage_app
+  appName:  dream_app_homepage
 
 # [Required]
 inputs:
@@ -56,7 +56,8 @@ configurations:
 
 controls:
   
-  # [Optional]
+  # [Optional] Feature to control the pipeline trigger options, defaults to `sourceRepository`
+  # Whole pipeline from frogbot-scan will be triggered
   triggerBy:
     
     # Connected source Git repository change [Defaults to true]
@@ -64,12 +65,17 @@ controls:
     
     # Other resource change from other pipelines
     externalResources:
-      - resource: other_java_pipeline_resource
+      - resourceName: dream_app_commons_build_result
     
     # Automated periodic triggers (eg: Nightly builds)
     cron:
       enable: false
       expression: "*/3 * * * *"
+
+    # Incoming webhook
+    incomingWebhooks:
+      - webhookName: '' # IncommingWebhook integration name
+
 
   # [Optional]
   logging:
@@ -78,7 +84,7 @@ controls:
     enableDebug: true
 
   # [Optional] Exporting important files during run as RUN FILES
-  export:
+  exporting:
 
     # [Optional] Defaults to false
     lintReport:
@@ -94,3 +100,27 @@ controls:
     codeQualityReport:
       enable: true
       reportPath: ''
+
+  # [Optional] Enable notifications
+  notifications:
+    - type: smtp-email
+      integrationName: '' # SMTP 
+      
+      # [Optional] Defaults to all the steps
+      steps:
+        - frogbot-scan
+        - lint
+        - test
+        - build
+        - deploy
+
+    - type: slack
+      integrationName: ''
+      
+      # [Optional] Defaults to all the steps
+      steps:
+        - frogbot-scan
+        - lint
+        - test
+        - build
+        - deploy

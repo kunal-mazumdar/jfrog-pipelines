@@ -67,6 +67,9 @@ pipelines:
         configuration:
           inputResources:
             - name: *gitResName
+            {{- range $resource := .Values.controls.triggerBy.externalResources }}
+            - name: '{{ $resource }}'
+            {{- end }}
           outputResources:
             - name: *frogbotScanResName
         execution:          

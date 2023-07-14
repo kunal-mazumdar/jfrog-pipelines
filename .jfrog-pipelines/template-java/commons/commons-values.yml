@@ -1,7 +1,7 @@
 # [Optional]
 metadata:
   # [Optional]
-  appName:  dream_app_homepage
+  appName:  dream_app_commons
 
 # [Required]
 inputs:
@@ -64,8 +64,8 @@ controls:
     sourceRepository: true
     
     # Other resource change from other pipelines
-    externalResources:
-      - resourceName: other_java_pipeline_resource
+    # externalResources:
+    #   - resourceName: other_java_pipeline_resource
     
     # Automated periodic triggers (eg: Nightly builds)
     cron:

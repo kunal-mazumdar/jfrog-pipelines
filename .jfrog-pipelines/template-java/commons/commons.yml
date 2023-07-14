@@ -1,0 +1,4 @@
+valuesFilePath: commons-values.yml
+
+include:
+  template: kunal/Java/1.0.0
