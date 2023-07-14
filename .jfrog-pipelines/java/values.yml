@@ -1,7 +1,7 @@
 # [Optional]
 metadata:
   # [Optional]
-  namePrefix:  homepage_app_
+  appName:  homepage_app
 
 # [Required]
 inputs:

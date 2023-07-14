@@ -2,12 +2,18 @@
 # - Validate required values 
 
 _variables:
-  gitResourceName: &gitResourceName '{{ .Values.metadata.namePrefix }}git_source'
+  gitResName: &gitResName '{{ .Values.metadata.appName }}_git_source'
+  frogbotScanResName: &frogbotScanResName '{{ .Values.metadata.appName }}_frogbot_scan_result'
+  codeQualityResName: &codeQualityResName '{{ .Values.metadata.appName }}_code_quality_result'
+  unitTestResName: &unitTestResName '{{ .Values.metadata.appName }}_unit_test_result'
+  buildInfoResultResName: &buildInfoResultResName '{{ .Values.metadata.appName }}_build_result'
+  buildInfoResName: &buildInfoResName '{{ .Values.metadata.appName }}_build_info'
+  pipelineName: &pipelineName '{{ .Values.metadata.appName }}_build'
 
 valuesFilePath: values.yml
 
 resources:
-  - name: *gitResourceName
+  - name: *gitResName
     type: GitRepo
     configuration:
       path: kunal-mazumdar/jfrog-pipelines
@@ -15,25 +21,25 @@ resources:
       branches:
         include: main
 
-  - name: frogbot_scan_result
+  - name: *frogbotScanResName
     type: PropertyBag
     configuration:
       timestamp: ''
       reportUrl: ''
 
-  - name: code_quality_result
+  - name: *codeQualityResName
     type: PropertyBag
     configuration:
       timestamp: ''
       reportUrl: ''
   
-  - name: unit_test_result
+  - name: *unitTestResName
     type: PropertyBag
     configuration:
       timestamp: ''
       status: ''
 
-  - name: build_result
+  - name: *buildInfoResultResName
     type: PropertyBag
     configuration:
       timestamp: ''
@@ -41,7 +47,7 @@ resources:
       buildStatus: ''
       publishStatus: ''
   
-  - name: java_test_app_build_info
+  - name: *buildInfoResName
     type: BuildInfo
     configuration:
       sourceArtifactory: myArt
@@ -49,7 +55,7 @@ resources:
       buildNumber: ${run_id}
 
 pipelines:
-  - name: java_template_pipeline
+  - name: *pipelineName
     configuration:      
       environmentVariables:
         readOnly:
@@ -60,9 +66,9 @@ pipelines:
         type: Bash
         configuration:
           inputResources:
-            - name: *gitResourceName
+            - name: *gitResName
           outputResources:
-            - name: frogbot_scan_result
+            - name: *frogbotScanResName
         execution:          
           onExecute:
             - echo 'Executing Frogbot scan...'
@@ -73,9 +79,9 @@ pipelines:
           inputSteps:
             - name: frogbot_scan
           inputResources:
-            - name: *gitResourceName        
+            - name: *gitResName        
           outputResources:
-            - name: code_quality_result
+            - name: *codeQualityResName
         execution:          
           onExecute:
             - echo 'Executing sonar...'
@@ -86,9 +92,9 @@ pipelines:
           inputSteps:
             - name: frogbot_scan
           inputResources:
-            - name: *gitResourceName  
+            - name: *gitResName  
           outputResources:
-            - name: unit_test_result
+            - name: *unitTestResName
         execution:          
           onExecute:
             - echo 'Linting...'
@@ -100,9 +106,9 @@ pipelines:
           inputSteps:
             - name: frogbot_scan
           inputResources:
-            - name: *gitResourceName  
+            - name: *gitResName  
           outputResources:
-            - name: build_result
+            - name: *buildInfoResultResName
         execution:          
           onExecute:
             - echo 'Linting...'
@@ -116,7 +122,7 @@ pipelines:
               status:
                 - success
           outputResources:
-            - name: build_result
+            - name: *buildInfoResultResName
         execution:
           onExecute:
             - echo 'Building...'
@@ -130,8 +136,8 @@ pipelines:
               status:
                 - success
           outputResources:
-            - name: build_result
-            - name: java_test_app_build_info
+            - name: *buildInfoResultResName
+            - name: *buildInfoResName
         execution:
           onExecute:
             - echo 'Publising...'
