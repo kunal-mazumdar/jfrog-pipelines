@@ -8,7 +8,7 @@ _variables:
   unitTestResName: &unitTestResName '{{ .Values.metadata.appName }}_unit_test_result'
   buildInfoResultResName: &buildInfoResultResName '{{ .Values.metadata.appName }}_build_result'
   buildInfoResName: &buildInfoResName '{{ .Values.metadata.appName }}_build_info'
-  pipelineName: &pipelineName '{{ .Values.metadata.appName }}_build'
+  pipelineName: &pipelineName '{{ .Values.metadata.appName }}_build_publish'
 
 valuesFilePath: values.yml
 
