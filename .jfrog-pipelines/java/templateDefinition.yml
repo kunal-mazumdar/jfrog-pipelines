@@ -1,8 +1,8 @@
 # TODOs:
 # - Validate required values 
 
-_variables:
-  gitResourceName: &gitResourceName "{{ .Values.metadata.namePrefix }}git_source"
+variables:
+  gitResourceName: &gitResourceName '{{ .Values.metadata.namePrefix }}git_source'
 
 valuesFilePath: values.yml
 
