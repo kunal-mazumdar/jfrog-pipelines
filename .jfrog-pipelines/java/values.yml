@@ -7,7 +7,7 @@ metadata:
 inputs:
   # [Required]
   sourceRepository:
-    # {{ ... Support all the Git Resource configuration properties ... }}
+    # ... Support all the Git Resource configuration properties ...
 
   integrations:
     # [Required]
