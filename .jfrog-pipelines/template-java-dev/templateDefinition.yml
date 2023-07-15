@@ -1,6 +1,3 @@
-# TODOs:
-# - Validate required values 
-
 _variables:
   gitResName: &gitResName '{{ .Values.metadata.appName }}_git_source'
   frogbotScanResName: &frogbotScanResName '{{ .Values.metadata.appName }}_frogbot_scan_result'
@@ -16,10 +13,9 @@ resources:
   - name: *gitResName
     type: GitRepo
     configuration:
-      path: kunal-mazumdar/jfrog-pipelines
-      gitProvider: kunal_gh
-      branches:
-        include: main
+      {{ range $key, $value := .Values.inputs.sourceRepository }}
+      {{ $key }}: {{ $value }}
+      {{ end }}
 
   - name: *frogbotScanResName
     type: PropertyBag

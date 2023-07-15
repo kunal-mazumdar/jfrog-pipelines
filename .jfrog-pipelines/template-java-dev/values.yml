@@ -11,6 +11,10 @@ inputs:
   sourceRepository:
     # ... Support all the Git Resource configuration properties ...
     # https://jfrog.com/help/r/jfrog-pipelines-documentation/gitrepo
+    path: kunal-mazumdar/jfrog-pipelines
+    gitProvider: kunal_gh
+    branches:
+      include: main
 
   # [Required]
   integrations:

@@ -1,16 +1,21 @@
-# [Optional]
+# [Required]
 metadata:
-  # [Optional]
+  
+  # [Required] All the underlying pipelines & resources names will be prefixed with appName for easy identifications & search
   appName:  dream_app_homepage
 
 # [Required]
 inputs:
-  # [Required]
+
+  # [Required] Configure Git repository where application code is present
   sourceRepository:
     # ... Support all the Git Resource configuration properties ...
+    # https://jfrog.com/help/r/jfrog-pipelines-documentation/gitrepo
 
+  # [Required]
   integrations:
-    # [Required]
+    
+    # [Required] Artifactory access token to configure Jfrog CLI
     artifactoryToken: jf_token
 
 # [Required]
@@ -27,29 +32,53 @@ configurations:
   commands:
 
     lint:
-      command: 'mvn clean checkstyle:checkstyle' # Default to plugin: maven-checkstyle-plugin
-      # command: './gradlew lint'
+
+      # [Maven] Default to plugin: maven-checkstyle-plugin
+      commands: 
+        - 'mvn clean checkstyle:checkstyle'
+      
+      # [Gradle]
+      # commands:
+      #  -  './gradlew lint'
 
       # [Optional] Default to false
       skip: false
 
     test:
-      command: 'mvn test' # Default to plugin: maven-surefire-plugin
-      # command: './gradlew test'
+
+      # [Maven] Default to plugin: maven-surefire-plugin
+      commands:
+        - 'mvn test'
+      
+      # [Gradle]
+      # commands:
+      #  - './gradlew test'
 
       # [Optional] Default to false
       skip: false
 
     build:
-      command: 'mvn -Dmaven.test.skip=true build' # Default to plugin: maven-compiler-plugin
-      # command: './gradlew clean build -x test'
+
+      # [Maven] Default to plugin: maven-compiler-plugin
+      commands: 
+        - 'mvn -Dmaven.test.skip=true build'
+      
+      # [Gradle]
+      # commands: 
+      #  - './gradlew clean build -x test'
 
       # [Optional] Default to false
       skip: false
 
     publish:
-      command: 'mvn deploy' # Default to plugin: maven-deploy-plugin
-      # command: './gradlew deploy'
+
+      # [Maven] Default to plugin: maven-deploy-plugin
+      commands:
+        - 'mvn deploy'
+      
+      # [Gradle]
+      # commands:
+      #  - './gradlew deploy'
       
       # [Optional] Default to false
       skip: false
@@ -65,12 +94,12 @@ controls:
     
     # Other resource change from other pipelines
     externalResources:
-      - resourceName: other_java_pipeline_resource
+      - resourceName: dream_app_commons_build_result
     
-    # Automated periodic triggers (eg: Nightly builds)
+    # Automated periodic triggers (Typical use case: Nightly builds)
     cron:
-      enable: false
-      expression: "*/3 * * * *"
+      enable: false # Defaults to false
+      expression: "*/3 * * * *" # No defaults, mandatory to provide when cron.enabled is set to true
 
     # Incoming webhook
     incomingWebhooks:
