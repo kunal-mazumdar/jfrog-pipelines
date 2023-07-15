@@ -13,9 +13,21 @@ resources:
   - name: *gitResName
     type: GitRepo
     configuration:
-      {{ range $key, $value := .Values.inputs.sourceRepository }}
-      {{ $key }}: {{ $value }}
+    {{ range $key, $value := .Values.inputs.sourceRepository }}
+
+    {{ $isObject := or (eq $key "files") (eq $key "branches") }}
+    {{ if (eq $isObject true )}}
+      {{ $key }}:
+      {{ range $depthKey, $depthValue := $key }}
+        {{ $depthKey }}: {{ $depthValue }}
       {{ end }}
+    {{ end }}
+
+    {{ else }}
+      {{ $key }}: {{ $value }}
+    {{ end }}
+
+    {{ end }}
 
   - name: *frogbotScanResName
     type: PropertyBag
