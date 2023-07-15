@@ -97,8 +97,8 @@ controls:
     sourceRepository: true
     
     # Other resource change from other pipelines
-    externalResources:
-      - resourceName: dream_app_commons_build_result
+    # externalResources:
+    #   - resourceName: dream_app_commons_build_result
     
     # Automated periodic triggers (Typical use case: Nightly builds)
     cron:
