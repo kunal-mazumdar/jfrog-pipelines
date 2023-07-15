@@ -21,8 +21,6 @@ resources:
       {{ range $depthKey, $depthValue := $key }}
         {{ $depthKey }}: {{ $depthValue }}
       {{ end }}
-    {{ end }}
-
     {{ else }}
       {{ $key }}: {{ $value }}
     {{ end }}
