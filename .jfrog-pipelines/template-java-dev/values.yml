@@ -107,7 +107,7 @@ controls:
 
     # Incoming webhook
     incomingWebhooks:
-      - webhookName: '' # IncommingWebhook integration name
+      - webhookName: 'testWebhook' # IncommingWebhook integration name
 
 
   # [Optional]
