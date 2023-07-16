@@ -39,7 +39,7 @@ resources:
   - name: *frogbotScanResName
     type: PropertyBag
     configuration:
-      timestamp: '{{ .Values.metadata.appName }}_webhook_{{ $webhook.webhookName }}'
+      timestamp: ''
       reportUrl: ''
 
   - name: *codeQualityResName
@@ -78,7 +78,7 @@ resources:
 
   {{ if $isWebhookTriggerEnabled }}
   {{- range $webhook := .Values.controls.triggerBy.incomingWebhooks }}
-  - name: {{ .Values.metadata.appName }}_webhook_{{ $webhook.webhookName }}
+  - name: "{{ .Values.metadata.appName }}_webhook_{{ $webhook.webhookName }}"
     type: IncomingWebhook
     configuration:
       webhookName: "{{ $webhook.webhookName }}"
@@ -94,6 +94,11 @@ pipelines:
         readOnly:
           ENABLE_DEBUG_LOGS: 'false'
           SKIP_FROGBOT_SCAN: 'false'
+          {{ if $isWebhookTriggerEnabled }}
+          {{- range $webhook := .Values.controls.triggerBy.incomingWebhooks }}
+          "{{ $webhook.webhookName }}": "{{ .Values.metadata.appName }}_webhook_{{ $webhook.webhookName }}"
+          {{ end }}
+          {{ end }}
     steps:
       - name: frogbot_scan
         type: Bash
@@ -116,7 +121,7 @@ pipelines:
             # Enable incoming webhook triggers
             {{ if $isWebhookTriggerEnabled }}
             {{- range $webhook := .Values.controls.triggerBy.incomingWebhooks }}
-            - name: {{ .Values.metadata.appName }}_webhook_{{ $webhook.webhookName }}
+            - name: "{{ .Values.metadata.appName }}_webhook_{{ $webhook.webhookName }}"
             {{ end }}
             {{ end }}
           outputResources:
