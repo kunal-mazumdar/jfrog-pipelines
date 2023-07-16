@@ -5,6 +5,8 @@ _meta:
   unitTestResName: &unitTestResName '{{ .Values.metadata.appName }}_unit_test_result'
   buildInfoResultResName: &buildInfoResultResName '{{ .Values.metadata.appName }}_build_result'
   buildInfoResName: &buildInfoResName '{{ .Values.metadata.appName }}_build_info'
+  cronResName: &cronResName '{{ .Values.metadata.appName }}_cron'
+  webhookResNamePrefix: &webhookResNamePrefix '{{ .Values.metadata.appName }}_webhook'
   pipelineName: &pipelineName '{{ .Values.metadata.appName }}_build'
 
 # Template Variables
@@ -12,7 +14,8 @@ _meta:
 {{ $isControlsAvailable := default false .Values.controls }}
 {{ $isTriggerByAvailable := default false (and $isControlsAvailable .Values.controls.triggerBy) }}
 {{ $isExternalTriggerAvailable := default false (and $isTriggerByAvailable .Values.controls.triggerBy.externalResources) }}
-
+{{ $isCronTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.cron (and .Values.controls.triggerBy.cron.enabled true)) }}
+{{ $isWebhookTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.incomingWebhooks) }}
 valuesFilePath: values.yml
 
 resources:
@@ -66,6 +69,22 @@ resources:
       buildName: java_test_app
       buildNumber: ${run_id}
 
+  {{ if $isCronTriggerEnabled }}
+  - name: *cronResName
+    type: CronTrigger
+    configuration:
+      interval: "{{ .Values.controls.triggerBy.cron.expression }}"
+  {{ end }}
+
+  {{ if $isWebhookTriggerEnabled }}
+  {{- range $webhook := .Values.controls.triggerBy.incomingWebhooks }}
+  - name: *webhookResNamePrefix{{"_"}}{{ $webhook.webhookName }}
+    type: IncomingWebhook
+    configuration:
+      webhookName: "{{ $webhook.webhookName }}"
+  {{ end }}
+  {{ end }}
+
 pipelines:
   - name: *pipelineName
     configuration:
@@ -81,10 +100,17 @@ pipelines:
         configuration:
           inputResources:
             - name: *gitResName
+            
+            # Enable trigger options via external resources
             {{ if $isExternalTriggerAvailable }}
             {{- range $resource := .Values.controls.triggerBy.externalResources }}
             - name: '{{ $resource.resourceName }}'
             {{- end }}
+            {{ end }}
+
+            # Enable cron trigger
+            {{ if $isCronTriggerEnabled }}
+            - name: *cronResName
             {{ end }}
           outputResources:
             - name: *frogbotScanResName
