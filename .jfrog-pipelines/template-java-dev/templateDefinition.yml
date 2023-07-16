@@ -8,15 +8,14 @@
 {{ $isWebhookTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.incomingWebhooks) }}
 
 _meta:
-  gitResName: &gitResName '{{ .Values.metadata.appName }}_git_source'
-  frogbotScanResName: &frogbotScanResName '{{ .Values.metadata.appName }}_frogbot_scan_result'
-  codeQualityResName: &codeQualityResName '{{ .Values.metadata.appName }}_code_quality_result'
-  unitTestResName: &unitTestResName '{{ .Values.metadata.appName }}_unit_test_result'
-  buildInfoResultResName: &buildInfoResultResName '{{ .Values.metadata.appName }}_build_result'
-  buildInfoResName: &buildInfoResName '{{ .Values.metadata.appName }}_build_info'
-  cronResName: &cronResName '{{ .Values.metadata.appName }}_cron'
-  pipelineName: &pipelineName '{{ .Values.metadata.appName }}_build'
-
+  gitResName: &gitResName '{{ $appName }}_git_source'
+  frogbotScanResName: &frogbotScanResName '{{ $appName }}_frogbot_scan_result'
+  codeQualityResName: &codeQualityResName '{{ $appName }}_code_quality_result'
+  unitTestResName: &unitTestResName '{{ $appName }}_unit_test_result'
+  buildInfoResultResName: &buildInfoResultResName '{{ $appName }}_build_result'
+  buildInfoResName: &buildInfoResName '{{ $appName }}_build_info'
+  cronResName: &cronResName '{{ $appName }}_cron'
+  pipelineName: &pipelineName '{{ $appName }}_build'
 
 valuesFilePath: values.yml
 
@@ -80,7 +79,7 @@ resources:
 
   {{ if $isWebhookTriggerEnabled }}
   {{- range $webhook := .Values.controls.triggerBy.incomingWebhooks }}
-  - name: "{{ .Values.metadata.appName }}_webhook_{{ $webhook.webhookName }}"
+  - name: "{{ $appName }}_webhook_{{ $webhook.webhookName }}"
     type: IncomingWebhook
     configuration:
       webhookName: "{{ $webhook.webhookName }}"
@@ -96,12 +95,6 @@ pipelines:
         readOnly:
           ENABLE_DEBUG_LOGS: 'false'
           SKIP_FROGBOT_SCAN: 'false'
-          APP_NAME: '{{ $appName }}'
-          {{ if $isWebhookTriggerEnabled }}
-          {{- range $webhook := .Values.controls.triggerBy.incomingWebhooks }}
-          "{{ $webhook.webhookName }}": "{{ $appName }}_webhook_{{ $webhook.webhookName }}"
-          {{ end }}
-          {{ end }}
     steps:
       - name: frogbot_scan
         type: Bash
@@ -124,7 +117,7 @@ pipelines:
             # Enable incoming webhook triggers
             {{ if $isWebhookTriggerEnabled }}
             {{- range $webhook := .Values.controls.triggerBy.incomingWebhooks }}
-            - name: "{{ .Values.metadata.appName }}_webhook_{{ $webhook.webhookName }}"
+            - name: "{{ $appName }}_webhook_{{ $webhook.webhookName }}"
             {{ end }}
             {{ end }}
           outputResources:
