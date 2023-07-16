@@ -15,6 +15,7 @@ _meta:
 {{ $isExternalTriggerAvailable := default false (and $isTriggerByAvailable .Values.controls.triggerBy.externalResources) }}
 {{ $isCronTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.cron (eq .Values.controls.triggerBy.cron.enabled true)) }}
 {{ $isWebhookTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.incomingWebhooks) }}
+
 valuesFilePath: values.yml
 
 resources:
@@ -38,10 +39,8 @@ resources:
   - name: *frogbotScanResName
     type: PropertyBag
     configuration:
-      timestamp: '{{ $isTriggerByAvailable }}'
-      reportUrl: '{{ eq true .Values.controls.triggerBy.cron.enabled }}'
-      reportUrl1: '{{ and $isTriggerByAvailable .Values.controls.triggerBy.cron (eq .Values.controls.triggerBy.cron.enabled true) }}'
-      reportUrl2: '{{ $isCronTriggerEnabled }}'
+      timestamp: '{{ .Values.metadata.appName }}_webhook_{{ $webhook.webhookName }}'
+      reportUrl: ''
 
   - name: *codeQualityResName
     type: PropertyBag
