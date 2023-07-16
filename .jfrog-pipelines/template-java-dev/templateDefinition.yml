@@ -1,3 +1,12 @@
+# Template Variables
+{{ $appName := .Values.metadata.appName }}
+{{ $buildTool := default "maven" .Values.configurations.buildTool }}
+{{ $isControlsAvailable := default false .Values.controls }}
+{{ $isTriggerByAvailable := default false (and $isControlsAvailable .Values.controls.triggerBy) }}
+{{ $isExternalTriggerAvailable := default false (and $isTriggerByAvailable .Values.controls.triggerBy.externalResources) }}
+{{ $isCronTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.cron (eq .Values.controls.triggerBy.cron.enabled true)) }}
+{{ $isWebhookTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.incomingWebhooks) }}
+
 _meta:
   gitResName: &gitResName '{{ .Values.metadata.appName }}_git_source'
   frogbotScanResName: &frogbotScanResName '{{ .Values.metadata.appName }}_frogbot_scan_result'
@@ -8,13 +17,6 @@ _meta:
   cronResName: &cronResName '{{ .Values.metadata.appName }}_cron'
   pipelineName: &pipelineName '{{ .Values.metadata.appName }}_build'
 
-# Template Variables
-{{ $buildTool := default "maven" .Values.configurations.buildTool }}
-{{ $isControlsAvailable := default false .Values.controls }}
-{{ $isTriggerByAvailable := default false (and $isControlsAvailable .Values.controls.triggerBy) }}
-{{ $isExternalTriggerAvailable := default false (and $isTriggerByAvailable .Values.controls.triggerBy.externalResources) }}
-{{ $isCronTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.cron (eq .Values.controls.triggerBy.cron.enabled true)) }}
-{{ $isWebhookTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.incomingWebhooks) }}
 
 valuesFilePath: values.yml
 
@@ -94,10 +96,10 @@ pipelines:
         readOnly:
           ENABLE_DEBUG_LOGS: 'false'
           SKIP_FROGBOT_SCAN: 'false'
-          APP_NAME: '{{ .Values.metadata.appName }}'
+          APP_NAME: '{{ $appName }}'
           {{ if $isWebhookTriggerEnabled }}
           {{- range $webhook := .Values.controls.triggerBy.incomingWebhooks }}
-          "{{ $webhook.webhookName }}": "{{ .Values.metadata.appName }}_webhook_{{ $webhook.webhookName }}"
+          "{{ $webhook.webhookName }}": "{{ $appName }}_webhook_{{ $webhook.webhookName }}"
           {{ end }}
           {{ end }}
     steps:
