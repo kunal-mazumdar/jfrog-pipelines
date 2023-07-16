@@ -39,7 +39,7 @@ resources:
     type: PropertyBag
     configuration:
       timestamp: '{{ $isTriggerByAvailable }}'
-      reportUrl: '{{ eq .Values.controls.triggerBy.cron.enabled true }}'
+      reportUrl: '{{ eq true .Values.controls.triggerBy.cron.enabled }}'
       reportUrl1: '{{ and $isTriggerByAvailable .Values.controls.triggerBy.cron (eq .Values.controls.triggerBy.cron.enabled true) }}'
       reportUrl2: '{{ $isCronTriggerEnabled }}'
 
