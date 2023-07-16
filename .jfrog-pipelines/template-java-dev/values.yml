@@ -94,7 +94,7 @@ controls:
   triggerBy:
     
     # Connected source Git repository change [Defaults to true]
-    sourceRepository: true
+    sourceRepository: false
     
     # Other resource change from other pipelines
     # externalResources:
@@ -106,8 +106,8 @@ controls:
     #   expression: "*/3 * * * *" # No defaults, mandatory to provide when cron.enabled is set to true
 
     # Incoming webhook
-    incomingWebhooks:
-      - webhookName: 'testWebhook' # IncommingWebhook integration name
+    # incomingWebhooks:
+    #   - webhookName: 'testWebhook' # IncommingWebhook integration name
 
 
   # [Optional]

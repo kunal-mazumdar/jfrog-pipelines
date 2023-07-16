@@ -3,6 +3,7 @@
 {{ $buildTool := default "maven" .Values.configurations.buildTool }}
 {{ $isControlsAvailable := default false .Values.controls }}
 {{ $isTriggerByAvailable := default false (and $isControlsAvailable .Values.controls.triggerBy) }}
+{{ $isGitTriggerEnabled := default false (and $isTriggerByAvailable (eq .Values.controls.triggerBy.sourceRepository true)) }}
 {{ $isExternalTriggerAvailable := default false (and $isTriggerByAvailable .Values.controls.triggerBy.externalResources) }}
 {{ $isCronTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.cron (eq .Values.controls.triggerBy.cron.enabled true)) }}
 {{ $isWebhookTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.incomingWebhooks) }}
@@ -101,6 +102,7 @@ pipelines:
         configuration:
           inputResources:
             - name: *gitResName
+              trigger: {{ $isGitTriggerEnabled }}
             
             # Enable trigger options via external resources
             {{ if $isExternalTriggerAvailable }}
