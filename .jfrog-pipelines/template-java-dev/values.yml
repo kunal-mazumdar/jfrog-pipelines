@@ -87,27 +87,27 @@ configurations:
       # [Optional] Default to false
       skip: false
 
-controls:
+# controls:
   
-  # [Optional] Feature to control the pipeline trigger options, defaults to `sourceRepository`
-  # Whole pipeline from frogbot-scan will be triggered
-  triggerBy:
+#   # [Optional] Feature to control the pipeline trigger options, defaults to `sourceRepository`
+#   # Whole pipeline from frogbot-scan will be triggered
+#   triggerBy:
     
-    # Connected source Git repository change [Defaults to true]
-    sourceRepository: true
+#     # Connected source Git repository change [Defaults to true]
+#     sourceRepository: true
     
-    # Other resource change from other pipelines
-    # externalResources:
-    #   - resourceName: dream_app_commons_build_result
+#     # Other resource change from other pipelines
+#     # externalResources:
+#     #   - resourceName: dream_app_commons_build_result
     
-    # Automated periodic triggers (Typical use case: Nightly builds)
-    cron:
-      enable: false # Defaults to false
-      expression: "*/3 * * * *" # No defaults, mandatory to provide when cron.enabled is set to true
+#     # Automated periodic triggers (Typical use case: Nightly builds)
+#     cron:
+#       enable: false # Defaults to false
+#       expression: "*/3 * * * *" # No defaults, mandatory to provide when cron.enabled is set to true
 
-    # Incoming webhook
-    incomingWebhooks:
-      - webhookName: '' # IncommingWebhook integration name
+#     # Incoming webhook
+#     incomingWebhooks:
+#       - webhookName: '' # IncommingWebhook integration name
 
 
   # [Optional]
