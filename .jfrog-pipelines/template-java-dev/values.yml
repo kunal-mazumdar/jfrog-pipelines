@@ -102,7 +102,7 @@ controls:
     
     # Automated periodic triggers (Typical use case: Nightly builds)
     cron:
-      enable: false # Defaults to false
+      enable: true # Defaults to false
       expression: "*/3 * * * *" # No defaults, mandatory to provide when cron.enabled is set to true
 
     # Incoming webhook
