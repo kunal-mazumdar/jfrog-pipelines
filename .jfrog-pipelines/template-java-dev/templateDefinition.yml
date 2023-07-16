@@ -94,6 +94,7 @@ pipelines:
         readOnly:
           ENABLE_DEBUG_LOGS: 'false'
           SKIP_FROGBOT_SCAN: 'false'
+          APP_NAME: '{{ .Values.metadata.appName }}'
           {{ if $isWebhookTriggerEnabled }}
           {{- range $webhook := .Values.controls.triggerBy.incomingWebhooks }}
           "{{ $webhook.webhookName }}": "{{ .Values.metadata.appName }}_webhook_{{ $webhook.webhookName }}"
