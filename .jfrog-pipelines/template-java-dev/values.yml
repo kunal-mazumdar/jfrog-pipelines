@@ -101,9 +101,9 @@ controls:
     #   - resourceName: dream_app_commons_build_result
     
     # Automated periodic triggers (Typical use case: Nightly builds)
-    cron:
-      enabled: true # Defaults to false
-      expression: "*/3 * * * *" # No defaults, mandatory to provide when cron.enabled is set to true
+    # cron:
+    #   enabled: true # Defaults to false
+    #   expression: "*/3 * * * *" # No defaults, mandatory to provide when cron.enabled is set to true
 
     # Incoming webhook
     incomingWebhooks:
