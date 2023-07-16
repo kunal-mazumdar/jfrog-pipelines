@@ -18,7 +18,7 @@ resources:
     {{ $isObject := or (eq $key "files") (eq $key "branches") }}
     {{ if (eq $isObject true )}}
       {{ $key }}:
-      {{ range $depthKey, $depthValue := .Values.inputs.sourceRepository.$key }}
+      {{ range $depthKey, $depthValue := (get $key .Values.inputs.sourceRepository) }}
         {{ $depthKey }}: {{ $depthValue }}
       {{ end }}
     {{ else }}
