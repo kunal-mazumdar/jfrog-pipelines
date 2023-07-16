@@ -7,6 +7,7 @@
 {{ $isExternalTriggerAvailable := default false (and $isTriggerByAvailable .Values.controls.triggerBy.externalResources) }}
 {{ $isCronTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.cron (eq .Values.controls.triggerBy.cron.enabled true)) }}
 {{ $isWebhookTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.incomingWebhooks) }}
+{{ $isDebugLogsEnabled := and $isControlsAvailable .Values.controls.logging (eq true .Values.controls.logging.enableDebug) }}
 
 _meta:
   gitResName: &gitResName '{{ $appName }}_git_source'
@@ -94,7 +95,7 @@ pipelines:
         - name: '{{ .Values.inputs.integrations.artifactoryToken }}'
       environmentVariables:
         readOnly:
-          ENABLE_DEBUG_LOGS: 'false'
+          ENABLE_DEBUG_LOGS: '{{ $isDebugLogsEnabled }}'
           SKIP_FROGBOT_SCAN: 'false'
     steps:
       - name: frogbot_scan
