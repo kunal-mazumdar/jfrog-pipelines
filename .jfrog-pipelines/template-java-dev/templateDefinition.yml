@@ -8,7 +8,7 @@ _meta:
   pipelineName: &pipelineName '{{ .Values.metadata.appName }}_build'
 
 # Template Variables
-{{ $buildTool := default 'maven' .Values.configurations.buildTool }}
+{{ $buildTool := default "maven" .Values.configurations.buildTool }}
 {{ $isControlsAvailable := default false bool(.Values.controls) }}
 {{ $isTriggerByAvailable := default false and ($isControlsAvailable bool(.Values.controls.triggerBy)) }}
 
