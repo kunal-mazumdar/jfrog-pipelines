@@ -38,8 +38,10 @@ resources:
   - name: *frogbotScanResName
     type: PropertyBag
     configuration:
-      timestamp: ''
-      reportUrl: ''
+      timestamp: '{{ $isTriggerByAvailable }}'
+      reportUrl: '{{ eq .Values.controls.triggerBy.cron.enabled true }}'
+      reportUrl1: '{{ and $isTriggerByAvailable .Values.controls.triggerBy.cron (eq .Values.controls.triggerBy.cron.enabled true) }}'
+      reportUrl2: '{{ $isCronTriggerEnabled }}'
 
   - name: *codeQualityResName
     type: PropertyBag
