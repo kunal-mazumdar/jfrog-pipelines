@@ -15,14 +15,14 @@ resources:
     configuration:
     {{ range $key, $value := .Values.inputs.sourceRepository }}
 
-    {{ $isObject := or (eq $key "files") (eq $key "branches") }}
-    {{ if (eq $isObject true )}}
+    {{ $isObject := or (eq $key "files") (eq $key "branches") (eq $key "pullRequestSourceBranches") (eq $key "pullRequestTargetBranches") (eq $key "tags") (eq $key "buildOn") (eq $key "cancelPendingRunsOn") (eq $key "pin") }}
+    {{ if not (eq $isObject true )}}
+      {{ $key }}: {{ $value }}
+    {{ else }}
       {{ $key }}:
       {{ range $depthKey, $depthValue := $value }}
         {{ $depthKey }}: {{ $depthValue }}
-      {{ end }}
-    {{ else }}
-      {{ $key }}: {{ $value }}
+      {{ end }}      
     {{ end }}
 
     {{ end }}
