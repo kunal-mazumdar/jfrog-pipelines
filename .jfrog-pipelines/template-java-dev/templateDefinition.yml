@@ -11,6 +11,7 @@ _meta:
 {{ $buildTool := default "maven" .Values.configurations.buildTool }}
 {{ $isControlsAvailable := default false .Values.controls }}
 {{ $isTriggerByAvailable := default false (and $isControlsAvailable .Values.controls.triggerBy) }}
+{{ $isExternalTriggerAvailable := default false (and $isTriggerByAvailable .Values.controls.triggerBy.externalResources) }}
 
 valuesFilePath: values.yml
 
@@ -80,7 +81,7 @@ pipelines:
         configuration:
           inputResources:
             - name: *gitResName
-            {{ if $isTriggerByAvailable }}
+            {{ if $isExternalTriggerAvailable }}
             {{- range $resource := .Values.controls.triggerBy.externalResources }}
             - name: '{{ $resource.resourceName }}'
             {{- end }}
