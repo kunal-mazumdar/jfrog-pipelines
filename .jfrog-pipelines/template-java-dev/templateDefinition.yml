@@ -6,7 +6,6 @@ _meta:
   buildInfoResultResName: &buildInfoResultResName '{{ .Values.metadata.appName }}_build_result'
   buildInfoResName: &buildInfoResName '{{ .Values.metadata.appName }}_build_info'
   cronResName: &cronResName '{{ .Values.metadata.appName }}_cron'
-  webhookResNamePrefix: &webhookResNamePrefix '{{ .Values.metadata.appName }}_webhook'
   pipelineName: &pipelineName '{{ .Values.metadata.appName }}_build'
 
 # Template Variables
@@ -78,7 +77,7 @@ resources:
 
   {{ if $isWebhookTriggerEnabled }}
   {{- range $webhook := .Values.controls.triggerBy.incomingWebhooks }}
-  - name: *webhookResNamePrefix{{"_"}}{{ $webhook.webhookName }}
+  - name: {{ .Values.metadata.appName"_webhook_"$webhook.webhookName }}
     type: IncomingWebhook
     configuration:
       webhookName: "{{ $webhook.webhookName }}"
