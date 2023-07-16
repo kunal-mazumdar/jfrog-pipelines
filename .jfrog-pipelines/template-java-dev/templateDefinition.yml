@@ -1,4 +1,4 @@
-_variables:
+_meta:
   gitResName: &gitResName '{{ .Values.metadata.appName }}_git_source'
   frogbotScanResName: &frogbotScanResName '{{ .Values.metadata.appName }}_frogbot_scan_result'
   codeQualityResName: &codeQualityResName '{{ .Values.metadata.appName }}_code_quality_result'
@@ -6,6 +6,11 @@ _variables:
   buildInfoResultResName: &buildInfoResultResName '{{ .Values.metadata.appName }}_build_result'
   buildInfoResName: &buildInfoResName '{{ .Values.metadata.appName }}_build_info'
   pipelineName: &pipelineName '{{ .Values.metadata.appName }}_build'
+
+# Template Variables
+{{ $buildTool := default 'maven' .Values.configurations.buildTool }}
+{{ $isControlsAvailable := default false bool(.Values.controls) }}
+{{ $isTriggerByAvailable := default false and ($isControlsAvailable bool(.Values.controls.triggerBy)) }}
 
 valuesFilePath: values.yml
 
@@ -30,8 +35,8 @@ resources:
   - name: *frogbotScanResName
     type: PropertyBag
     configuration:
-      timestamp: ''
-      reportUrl: ''
+      timestamp: '{{ $isControlsAvailable }}'
+      reportUrl: '{{ $isTriggerByAvailable }}'
 
   - name: *codeQualityResName
     type: PropertyBag
@@ -62,7 +67,9 @@ resources:
 
 pipelines:
   - name: *pipelineName
-    configuration:      
+    configuration:
+      integrations:
+        - name: '{{ .Values.inputs.integrations.artifactoryToken }}'
       environmentVariables:
         readOnly:
           ENABLE_DEBUG_LOGS: 'false'
