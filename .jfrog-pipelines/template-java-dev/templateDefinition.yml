@@ -36,8 +36,8 @@ resources:
   - name: *frogbotScanResName
     type: PropertyBag
     configuration:
-      timestamp: '{{ $isControlsAvailable }}'
-      reportUrl: '{{ $isTriggerByAvailable }}'
+      timestamp: ''
+      reportUrl: ''
 
   - name: *codeQualityResName
     type: PropertyBag
