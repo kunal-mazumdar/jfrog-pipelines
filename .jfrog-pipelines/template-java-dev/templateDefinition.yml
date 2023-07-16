@@ -10,7 +10,7 @@ _meta:
 # Template Variables
 {{ $buildTool := default "maven" .Values.configurations.buildTool }}
 {{ $isControlsAvailable := default false .Values.controls }}
-{{ $isTriggerByAvailable := default false and ($isControlsAvailable .Values.controls.triggerBy) }}
+{{ $isTriggerByAvailable := default false (and $isControlsAvailable .Values.controls.triggerBy) }}
 
 valuesFilePath: values.yml
 
