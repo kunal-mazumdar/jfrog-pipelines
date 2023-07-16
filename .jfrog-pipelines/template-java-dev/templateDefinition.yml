@@ -16,7 +16,7 @@ resources:
     {{ range $key, $value := .Values.inputs.sourceRepository }}
 
     {{ $isObject := or (eq $key "files") (eq $key "branches") (eq $key "pullRequestSourceBranches") (eq $key "pullRequestTargetBranches") (eq $key "tags") (eq $key "buildOn") (eq $key "cancelPendingRunsOn") (eq $key "pin") }}
-    {{ if not (eq $isObject true )}}
+    {{ if (eq $isObject false )}}
       {{ $key }}: {{ $value }}
     {{ else }}
       {{ $key }}:
