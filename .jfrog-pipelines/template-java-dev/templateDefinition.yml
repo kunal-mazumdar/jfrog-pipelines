@@ -33,10 +33,10 @@
 
 # Commands
 {{ $isCommandsAvailable := default false .Values.configurations.commands }}
-{{ $isMvnLintCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.lint.commands }}
-{{ $isMvnTestCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.test.commands }}
-{{ $isMvnBuildCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.build.commands }}
-{{ $isMvnPublishCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.publish.commands }}
+{{ $isMvnLintCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.lint }}
+{{ $isMvnTestCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.test }}
+{{ $isMvnBuildCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.build }}
+{{ $isMvnPublishCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.publish }}
 
 {{ $mvnDefaultLintCmd := "mvn clean checkstyle:checkstyle" }}
 {{ $mvnDefaultTestCmd := "mvn clean test" }}
@@ -193,7 +193,7 @@ pipelines:
             - echo 'Testing...'
             - pushd ${res_{{ $gitResName }}_resourcePath}
             {{ if $isMvnTestCmdAvailable }}
-            {{- range $cmd := .Values.configurations.commands.test }}
+            {{- range $cmd := .Values.configurations.commands.test.commands }}
             - {{ $cmd }}
             {{- end }}
             {{ else }}
@@ -216,7 +216,7 @@ pipelines:
             - echo 'Linting...'
             - pushd ${res_{{ $gitResName }}_resourcePath}
             {{ if $isMvnLintCmdAvailable }}
-            {{- range $cmd := .Values.configurations.commands.lint }}
+            {{- range $cmd := .Values.configurations.commands.lint.commands }}
             - {{ $cmd }}
             {{- end }}
             {{ else }}
@@ -239,7 +239,7 @@ pipelines:
             - echo 'Building...'
             - pushd ${res_{{ $gitResName }}_resourcePath}
             {{ if $isMvnBuildCmdAvailable }}
-            {{- range $cmd := .Values.configurations.commands.build }}
+            {{- range $cmd := .Values.configurations.commands.build.commands }}
             - {{ $cmd }}
             {{- end }}
             {{ else }}
@@ -263,7 +263,7 @@ pipelines:
             - echo 'Publishing...'
             - pushd ${res_{{ $gitResName }}_resourcePath}
             {{ if $isMvnPublishCmdAvailable }}
-            {{- range $cmd := .Values.configurations.commands.publish }}
+            {{- range $cmd := .Values.configurations.commands.publish.commands }}
             - {{ $cmd }}
             {{- end }}
             {{ else }}
