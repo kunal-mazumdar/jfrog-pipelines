@@ -123,25 +123,25 @@ controls:
     enabled: true
 
   # [Optional] Enable notifications
-#  notifications:
-#    email:
-#      integrationName: '' # SMTP
-#
-#      # [Optional] Defaults to all the steps
-#      steps:
-#        - frogbot-scan
-#        - lint
-#        - test
-#        - build
-#        - deploy
-#
-#    slack:
-#      integrationName: ''
-#
-#      # [Optional] Defaults to all the steps
-#      steps:
-#        - frogbot-scan
-#        - lint
-#        - test
-#        - build
-#        - deploy
+  notifications:
+    email:
+      integrationName: 'mySMTP' # SMTP
+
+      # [Optional] Defaults to all the steps
+      steps:
+        - frogbot-scan
+        - lint
+        - test
+        - build
+        - deploy
+
+    slack:
+      integrationName: 'mySlack'
+
+      # [Optional] Defaults to all the steps
+      steps:
+        - frogbot-scan
+        - lint
+        - test
+        - build
+        - deploy
