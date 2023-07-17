@@ -118,6 +118,8 @@ pipelines:
         image:
           auto:
             language: java
+            versions:
+              - "17"
       integrations:
         - name: '{{ .Values.inputs.integrations.artifactoryToken }}'
         {{ if $isEmailNotificationsAvailable}}
