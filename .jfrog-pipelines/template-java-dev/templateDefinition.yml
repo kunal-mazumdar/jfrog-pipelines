@@ -222,7 +222,10 @@ pipelines:
             {{ else }}
             - {{ $mvnDefaultLintCmd }}
             {{ end }}
+            - cp * ${shared_workspace}
+            - ls -lrt
             - popd
+            - ls -lrt ${shared_workspace}
 
       - name: build
         type: Bash
@@ -237,7 +240,7 @@ pipelines:
         execution:
           onExecute:
             - echo 'Building...'
-            - pushd ${res_{{ $gitResName }}_resourcePath}
+            - pushd ${shared_workspace}
             {{ if $isMvnBuildCmdAvailable }}
             {{- range $cmd := .Values.configurations.commands.build.commands }}
             - {{ $cmd }}
@@ -261,7 +264,7 @@ pipelines:
         execution:
           onExecute:
             - echo 'Publishing...'
-            - pushd ${res_{{ $gitResName }}_resourcePath}
+            - pushd ${shared_workspace}
             {{ if $isMvnPublishCmdAvailable }}
             {{- range $cmd := .Values.configurations.commands.publish.commands }}
             - {{ $cmd }}
