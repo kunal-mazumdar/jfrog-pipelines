@@ -201,7 +201,7 @@ pipelines:
         execution:          
           onExecute:
             - echo 'Linting...'
-            - pushd res_{{ $gitResName }}_resourcePath
+            - pushd ${res_{{ $gitResName }}_resourcePath}
             {{ if $isMvnLintCmdAvailable }}
             {{- range $cmd := .Values.configurations.commands.lint }}
             - {{ $cmd }}
