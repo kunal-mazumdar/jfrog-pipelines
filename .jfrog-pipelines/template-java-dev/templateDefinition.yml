@@ -113,6 +113,12 @@ resources:
 pipelines:
   - name: *pipelineName
     configuration:
+      runtime:
+        type: image
+        image:
+          auto:
+            language: java
+            version: "17"
       integrations:
         - name: '{{ .Values.inputs.integrations.artifactoryToken }}'
         {{ if $isEmailNotificationsAvailable}}
