@@ -96,7 +96,7 @@ controls:
   triggerBy:
     
     # Connected source Git repository change [Defaults to true]
-    sourceRepository: false
+    sourceRepository: true
     
     # Other resource change from other pipelines
     # externalResources:
