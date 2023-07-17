@@ -1,5 +1,8 @@
 # Template Variables
+# Shared
 {{ $appName := .Values.metadata.appName }}
+
+# Build Trigger
 {{ $buildTool := default "maven" .Values.configurations.buildTool }}
 {{ $isControlsAvailable := default false .Values.controls }}
 {{ $isTriggerByAvailable := default false (and $isControlsAvailable .Values.controls.triggerBy) }}
@@ -7,7 +10,17 @@
 {{ $isExternalTriggerAvailable := default false (and $isTriggerByAvailable .Values.controls.triggerBy.externalResources) }}
 {{ $isCronTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.cron (eq .Values.controls.triggerBy.cron.enabled true)) }}
 {{ $isWebhookTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.incomingWebhooks) }}
+
+# Logging
 {{ $isDebugLogsEnabled := and $isControlsAvailable .Values.controls.logging (eq true .Values.controls.logging.enableDebug) }}
+
+# Exporting
+{{ $isExportingEnabled := and $isControlsAvailable .Values.controls.exporting (eq true .Values.controls.exporting.enabled) }}
+
+# Notifications
+{{ $isNotificationsAvailable := default false (and $isControlsAvailable .Values.controls.notifications) }}
+{{ $isEmailNotificationsAvailable := default false (and $isNotificationsAvailable .Values.controls.notifications.email) }}
+{{ $isSlackNotificationsAvailable := default false (and $isNotificationsAvailable .Values.controls.notifications.slack) }}
 
 _meta:
   gitResName: &gitResName '{{ $appName }}_git_source'
@@ -93,6 +106,12 @@ pipelines:
     configuration:
       integrations:
         - name: '{{ .Values.inputs.integrations.artifactoryToken }}'
+        {{ if $isEmailNotificationsAvailable}}
+        - name: {{ .Values.controls.notifications.email.integrationName }}
+        {{ end }}
+        {{ if $isSlackNotificationsAvailable }}
+        - name: { { .Values.controls.notifications.slack.integrationName } }
+        {{ end }}
       environmentVariables:
         readOnly:
           ENABLE_DEBUG_LOGS: '{{ $isDebugLogsEnabled }}'

@@ -120,40 +120,28 @@ controls:
   exporting:
 
     # [Optional] Defaults to false
-    lintReport:
-      enable: true
-      reportPath: ''
-    
-    # [Optional] Defaults to false
-    unitTestReport:
-      enable: true
-      reportPath: ''
-
-    # [Optional] Defaults to false  
-    codeQualityReport:
-      enable: true
-      reportPath: ''
+    enabled: true
 
   # [Optional] Enable notifications
-  notifications:
-    - type: smtp-email
-      integrationName: '' # SMTP 
-      
-      # [Optional] Defaults to all the steps
-      steps:
-        - frogbot-scan
-        - lint
-        - test
-        - build
-        - deploy
-
-    - type: slack
-      integrationName: ''
-      
-      # [Optional] Defaults to all the steps
-      steps:
-        - frogbot-scan
-        - lint
-        - test
-        - build
-        - deploy
+#  notifications:
+#    email:
+#      integrationName: '' # SMTP
+#
+#      # [Optional] Defaults to all the steps
+#      steps:
+#        - frogbot-scan
+#        - lint
+#        - test
+#        - build
+#        - deploy
+#
+#    slack:
+#      integrationName: ''
+#
+#      # [Optional] Defaults to all the steps
+#      steps:
+#        - frogbot-scan
+#        - lint
+#        - test
+#        - build
+#        - deploy
