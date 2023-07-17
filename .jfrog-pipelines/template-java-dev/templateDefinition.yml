@@ -32,7 +32,11 @@
 {{ $isSlackNotificationsAvailable := default false (and $isNotificationsAvailable .Values.controls.notifications.slack) }}
 
 # Commands
-{{ $isMvnLintCmdAvailable := and (.Values.configurations.commands) (.Values.configurations.commands.lint) }}
+{{ $isCommandsAvailable := default false .Values.configurations.commands }}
+{{ $isMvnLintCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.lint }}
+{{ $isMvnTestCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.test }}
+{{ $isMvnBuildCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.build }}
+{{ $isMvnDeployCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.deploy }}
 
 {{ $mvnDefaultLintCmd := "mvn clean checkstyle:checkstyle" }}
 {{ $mvnDefaultTestCmd := "mvn clean test" }}
@@ -62,7 +66,7 @@ resources:
   - name: {{ $frogbotScanResName }}
     type: PropertyBag
     configuration:
-      timestamp: '{{ $gitResName }}'
+      timestamp: ''
       reportUrl: ''
 
   - name: {{ $codeQualityResName }}
@@ -96,7 +100,7 @@ resources:
   - name: {{ $cronResName }}
     type: CronTrigger
     configuration:
-      interval: "{{ .Values.controls.triggerBy.cron.expression }}"
+      interval: '{{ .Values.controls.triggerBy.cron.expression }}'
   {{ end }}
 
   {{ if $isWebhookTriggerEnabled }}
@@ -104,7 +108,7 @@ resources:
   - name: "{{ $appName }}_webhook_{{ $webhook.webhookName }}"
     type: IncomingWebhook
     configuration:
-      webhookName: "{{ $webhook.webhookName }}"
+      webhookName: {{ $webhook.webhookName }}
   {{ end }}
   {{ end }}
 
@@ -119,7 +123,7 @@ pipelines:
             versions:
               - "17"
       integrations:
-        - name: '{{ .Values.inputs.integrations.artifactoryToken }}'
+        - name: {{ .Values.inputs.integrations.artifactoryToken }}
         {{ if $isEmailNotificationsAvailable}}
         - name: {{ .Values.controls.notifications.email.integrationName }}
         {{ end }}
@@ -187,6 +191,15 @@ pipelines:
         execution:          
           onExecute:
             - echo 'Testing...'
+            - pushd ${res_{{ $gitResName }}_resourcePath}
+            {{ if $isMvnTestCmdAvailable }}
+            {{- range $cmd := .Values.configurations.commands.test }}
+            - {{ $cmd }}
+            {{- end }}
+            {{ else }}
+            - {{ $mvnDefaultTestCmd }}
+            {{ end }}
+            - popd
 
       - name: lint
         type: Bash
@@ -224,6 +237,15 @@ pipelines:
         execution:
           onExecute:
             - echo 'Building...'
+            - pushd ${res_{{ $gitResName }}_resourcePath}
+            {{ if $isMvnBuildCmdAvailable }}
+            {{- range $cmd := .Values.configurations.commands.build }}
+            - {{ $cmd }}
+            {{- end }}
+            {{ else }}
+            - {{ $mvnDefaultBuildCmd }}
+            {{ end }}
+            - popd
 
       - name: publish
         type: Bash
@@ -239,3 +261,12 @@ pipelines:
         execution:
           onExecute:
             - echo 'Publishing...'
+            - pushd ${res_{{ $gitResName }}_resourcePath}
+            {{ if $isMvnPublishCmdAvailable }}
+            {{- range $cmd := .Values.configurations.commands.publish }}
+            - {{ $cmd }}
+            {{- end }}
+            {{ else }}
+            - {{ $mvnDefaultPublishCmd }}
+            {{ end }}
+            - popd
