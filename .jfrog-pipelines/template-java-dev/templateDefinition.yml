@@ -110,7 +110,7 @@ pipelines:
         - name: {{ .Values.controls.notifications.email.integrationName }}
         {{ end }}
         {{ if $isSlackNotificationsAvailable }}
-        - name: { { .Values.controls.notifications.slack.integrationName } }
+        - name: {{ .Values.controls.notifications.slack.integrationName }}
         {{ end }}
       environmentVariables:
         readOnly:
