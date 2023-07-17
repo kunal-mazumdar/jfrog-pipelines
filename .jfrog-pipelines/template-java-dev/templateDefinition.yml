@@ -30,6 +30,8 @@
 {{ $mvnDefaultBuildCmd := "mvn -Dmaven.test.skip=true install" }}
 {{ $mvnDefaultDeployCmd := "mvn deploy" }}
 
+# Resource name
+{{ $gitResName := print $appName "_git_source" }}
 
 _meta:
   gitResName: &gitResName '{{ $appName }}_git_source'
@@ -64,7 +66,7 @@ resources:
   - name: *frogbotScanResName
     type: PropertyBag
     configuration:
-      timestamp: ''
+      timestamp: '{{ $gitResName }}'
       reportUrl: ''
 
   - name: *codeQualityResName
