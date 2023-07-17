@@ -22,6 +22,15 @@
 {{ $isEmailNotificationsAvailable := default false (and $isNotificationsAvailable .Values.controls.notifications.email) }}
 {{ $isSlackNotificationsAvailable := default false (and $isNotificationsAvailable .Values.controls.notifications.slack) }}
 
+# Commands
+{{ $isMvnLintCmdAvailable := and (.Values.configurations.commands) (.Values.configurations.commands.lint) }}
+
+{{ $mvnDefaultLintCmd := "mvn clean checkstyle:checkstyle" }}
+{{ $mvnDefaultTestCmd := "mvn clean test" }}
+{{ $mvnDefaultBuildCmd := "mvn -Dmaven.test.skip=true install" }}
+{{ $mvnDefaultDeployCmd := "mvn deploy" }}
+
+
 _meta:
   gitResName: &gitResName '{{ $appName }}_git_source'
   frogbotScanResName: &frogbotScanResName '{{ $appName }}_frogbot_scan_result'
@@ -172,7 +181,7 @@ pipelines:
             - name: *unitTestResName
         execution:          
           onExecute:
-            - echo 'Linting...'
+            - echo 'Testing...'
 
       - name: lint
         type: Bash
@@ -187,6 +196,13 @@ pipelines:
         execution:          
           onExecute:
             - echo 'Linting...'
+            {{ if $isMvnLintCmdAvailable }}
+            {{- range $cmd := .Values.configurations.commands.lint }}
+            - {{ $cmd }}
+            {{- end }}
+            {{ else }}
+            - {{ $mvnDefaultLintCmd }}
+            {{ end }}
 
       - name: build
         type: Bash
@@ -215,4 +231,4 @@ pipelines:
             - name: *buildInfoResName
         execution:
           onExecute:
-            - echo 'Publising...'
+            - echo 'Publishing...'
