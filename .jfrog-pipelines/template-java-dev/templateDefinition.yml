@@ -1,11 +1,8 @@
 # Template Variables
 
 # Names
-{{
-  $appName := .Values.metadata.appName
-  $gitResName := print $appName "_git_source"
-}}
-#{{ $gitResName := print $appName "_git_source" }}
+{{ $appName := .Values.metadata.appName }}
+{{ $gitResName := print $appName "_git_source" }}
 {{ $frogbotScanResName := print $appName "_frogbot_scan_result" }}
 {{ $codeQualityResName := print $appName "_code_quality_result" }}
 {{ $unitTestResName := print $appName "_unit_test_result" }}
