@@ -33,10 +33,10 @@
 
 # Commands
 {{ $isCommandsAvailable := default false .Values.configurations.commands }}
-{{ $isMvnLintCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.lint }}
-{{ $isMvnTestCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.test }}
-{{ $isMvnBuildCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.build }}
-{{ $isMvnPublishCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.publish }}
+{{ $isMvnLintCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.lint.commands }}
+{{ $isMvnTestCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.test.commands }}
+{{ $isMvnBuildCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.build.commands }}
+{{ $isMvnPublishCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.publish.commands }}
 
 {{ $mvnDefaultLintCmd := "mvn clean checkstyle:checkstyle" }}
 {{ $mvnDefaultTestCmd := "mvn clean test" }}
