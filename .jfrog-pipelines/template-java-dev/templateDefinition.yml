@@ -36,12 +36,12 @@
 {{ $isMvnLintCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.lint }}
 {{ $isMvnTestCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.test }}
 {{ $isMvnBuildCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.build }}
-{{ $isMvnDeployCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.deploy }}
+{{ $isMvnPublishCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.publish }}
 
 {{ $mvnDefaultLintCmd := "mvn clean checkstyle:checkstyle" }}
 {{ $mvnDefaultTestCmd := "mvn clean test" }}
 {{ $mvnDefaultBuildCmd := "mvn -Dmaven.test.skip=true install" }}
-{{ $mvnDefaultDeployCmd := "mvn deploy" }}
+{{ $mvnDefaultPublishCmd := "mvn deploy" }}
 
 valuesFilePath: values.yml
 
