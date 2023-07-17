@@ -2,7 +2,7 @@
 metadata:
   
   # [Required] All the underlying pipelines & resources names will be prefixed with appName for easy identifications & search
-  appName:  dream_app_homepage_2
+  appName:  dream_app_homepage
 
   java:
 
