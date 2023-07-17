@@ -1,6 +1,15 @@
 # Template Variables
-# Shared
+
+# Names
 {{ $appName := .Values.metadata.appName }}
+{{ $gitResName := print $appName "_git_source" }}
+{{ $frogbotScanResName := print $appName "_frogbot_scan_result" }}
+{{ $codeQualityResName := print $appName "_code_quality_result" }}
+{{ $unitTestResName := print $appName "_unit_test_result" }}
+{{ $buildInfoResultResName := print $appName "_build_result" }}
+{{ $buildInfoResName := print $appName "_build_info" }}
+{{ $cronResName := print $appName "_cron" }}
+{{ $pipelineName := print $appName "_build" }}
 
 # Build Trigger
 {{ $buildTool := default "maven" .Values.configurations.buildTool }}
@@ -30,23 +39,10 @@
 {{ $mvnDefaultBuildCmd := "mvn -Dmaven.test.skip=true install" }}
 {{ $mvnDefaultDeployCmd := "mvn deploy" }}
 
-# Resource name
-{{ $gitResName := print $appName "_git_source" }}
-
-_meta:
-  gitResName: &gitResName '{{ $appName }}_git_source'
-  frogbotScanResName: &frogbotScanResName '{{ $appName }}_frogbot_scan_result'
-  codeQualityResName: &codeQualityResName '{{ $appName }}_code_quality_result'
-  unitTestResName: &unitTestResName '{{ $appName }}_unit_test_result'
-  buildInfoResultResName: &buildInfoResultResName '{{ $appName }}_build_result'
-  buildInfoResName: &buildInfoResName '{{ $appName }}_build_info'
-  cronResName: &cronResName '{{ $appName }}_cron'
-  pipelineName: &pipelineName '{{ $appName }}_build'
-
 valuesFilePath: values.yml
 
 resources:
-  - name: *gitResName
+  - name: {{ $gitResName }}
     type: GitRepo
     configuration:
     {{ range $key, $value := .Values.inputs.sourceRepository }}
@@ -63,25 +59,25 @@ resources:
 
     {{ end }}
 
-  - name: *frogbotScanResName
+  - name: {{ $frogbotScanResName }}
     type: PropertyBag
     configuration:
       timestamp: '{{ $gitResName }}'
       reportUrl: ''
 
-  - name: *codeQualityResName
+  - name: {{ $codeQualityResName }}
     type: PropertyBag
     configuration:
       timestamp: ''
       reportUrl: ''
   
-  - name: *unitTestResName
+  - name: {{ $unitTestResName }}
     type: PropertyBag
     configuration:
       timestamp: ''
       status: ''
 
-  - name: *buildInfoResultResName
+  - name: {{ $buildInfoResultResName }}
     type: PropertyBag
     configuration:
       timestamp: ''
@@ -89,7 +85,7 @@ resources:
       buildStatus: ''
       publishStatus: ''
   
-  - name: *buildInfoResName
+  - name: {{ $buildInfoResName }}
     type: BuildInfo
     configuration:
       sourceArtifactory: myArt
@@ -97,7 +93,7 @@ resources:
       buildNumber: ${run_id}
 
   {{ if $isCronTriggerEnabled }}
-  - name: *cronResName
+  - name: {{ $cronResName }}
     type: CronTrigger
     configuration:
       interval: "{{ .Values.controls.triggerBy.cron.expression }}"
@@ -113,7 +109,7 @@ resources:
   {{ end }}
 
 pipelines:
-  - name: *pipelineName
+  - name: {{ $pipelineName }}
     configuration:
       runtime:
         type: image
@@ -139,7 +135,7 @@ pipelines:
         type: Bash
         configuration:
           inputResources:
-            - name: *gitResName
+            - name: {{ $gitResName }}
               trigger: {{ $isGitTriggerEnabled }}
             
             # Enable trigger options via external resources
@@ -151,7 +147,7 @@ pipelines:
 
             # Enable cron trigger
             {{ if $isCronTriggerEnabled }}
-            - name: *cronResName
+            - name: {{ $cronResName }}
             {{ end }}
 
             # Enable incoming webhook triggers
@@ -161,7 +157,7 @@ pipelines:
             {{ end }}
             {{ end }}
           outputResources:
-            - name: *frogbotScanResName
+            - name: {{ $frogbotScanResName }}
         execution:          
           onExecute:
             - echo 'Executing Frogbot scan...'
@@ -172,9 +168,9 @@ pipelines:
           inputSteps:
             - name: frogbot_scan
           inputResources:
-            - name: *gitResName        
+            - name: {{ $gitResName }}
           outputResources:
-            - name: *codeQualityResName
+            - name: {{ $codeQualityResName }}
         execution:          
           onExecute:
             - echo 'Executing sonar...'
@@ -185,9 +181,9 @@ pipelines:
           inputSteps:
             - name: frogbot_scan
           inputResources:
-            - name: *gitResName  
+            - name: {{ $gitResName }}
           outputResources:
-            - name: *unitTestResName
+            - name: {{ $unitTestResName }}
         execution:          
           onExecute:
             - echo 'Testing...'
@@ -199,12 +195,13 @@ pipelines:
           inputSteps:
             - name: frogbot_scan
           inputResources:
-            - name: *gitResName  
+            - name: {{ $gitResName }}
           outputResources:
-            - name: *buildInfoResultResName
+            - name: {{ $buildInfoResultResName }}
         execution:          
           onExecute:
             - echo 'Linting...'
+            - pushd res_{{ $gitResName }}_resourcePath
             {{ if $isMvnLintCmdAvailable }}
             {{- range $cmd := .Values.configurations.commands.lint }}
             - {{ $cmd }}
@@ -212,6 +209,7 @@ pipelines:
             {{ else }}
             - {{ $mvnDefaultLintCmd }}
             {{ end }}
+            - popd
 
       - name: build
         type: Bash
@@ -222,7 +220,7 @@ pipelines:
               status:
                 - success
           outputResources:
-            - name: *buildInfoResultResName
+            - name: {{ $buildInfoResultResName }}
         execution:
           onExecute:
             - echo 'Building...'
@@ -236,8 +234,8 @@ pipelines:
               status:
                 - success
           outputResources:
-            - name: *buildInfoResultResName
-            - name: *buildInfoResName
+            - name: {{ $buildInfoResultResName }}
+            - name: {{ $buildInfoResName }}
         execution:
           onExecute:
             - echo 'Publishing...'
