@@ -222,7 +222,7 @@ pipelines:
             {{ else }}
             - {{ $mvnDefaultLintCmd }}
             {{ end }}
-            - cp * ${shared_workspace}
+            - cp -r * ${shared_workspace}
             - ls -lrt
             - popd
             - ls -lrt ${shared_workspace}
