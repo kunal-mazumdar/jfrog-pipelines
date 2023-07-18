@@ -37,71 +37,56 @@ configurations:
   # [Required] When buildTool = Other
   steps:
 
-#    lint:
-#
-#      # [Maven] Default to plugin: maven-checkstyle-plugin
-#      commands:
-#        - 'mvn clean checkstyle:checkstyle'
-#
-#      # [Gradle]
-#      # commands:
-#      #  -  './gradlew lint'
-#
-#      # [Optional] Default to false
-#      skip: false
+    lint:
 
-#    codeQuality:
-#
-#      # [Maven] Default to plugin: maven-checkstyle-plugin
-#      commands:
-#        - 'mvn clean sonar:sonar'
-#
-#      # [Gradle]
-#      # commands:
-#      #  - 'gradle sonar'
-#
-#      # [Optional] Default to false
-#      skip: false
+      # [Maven] Default to plugin: maven-checkstyle-plugin
+      commands:
+        - 'mvn clean checkstyle:checkstyle'
 
-#    test:
-#
-#      # [Maven] Default to plugin: maven-surefire-plugin
-#      commands:
-#        - 'mvn clean'
-#        - 'mvn test'
-#
-#      # [Gradle]
-#      # commands:
-#      #  - './gradlew test'
-#
-#      # [Optional] Default to false
-#      skip: false
+      # [Gradle]
+      # commands:
+      #  - 'gradle lint'
 
-#    build:
-#
-#      # [Maven] Default to plugin: maven-compiler-plugin
-#      commands:
-#        - 'mvn -Dmaven.test.skip=true install'
-#
-#      # [Gradle]
-#      # commands:
-#      #  - './gradlew clean build -x test'
-#
-#      # [Optional] Default to false
-#      skip: false
-#
-#    publish:
-#
-#      # [Maven] Default to plugin: maven-deploy-plugin
-#      commands:
-#        - 'mvn deploy'
-#
-#      # [Gradle]
-#      # commands:
-#      #  - './gradlew deploy'
-#
-#      # [Optional] Default to false
-#      skip: false
+    codeQuality:
+
+      # [Maven] Default to plugin: maven-checkstyle-plugin
+      commands:
+        - 'mvn clean sonar:sonar'
+
+      # [Gradle]
+      # commands:
+      #  - 'gradle sonar'
+
+    test:
+
+      # [Maven] Default to plugin: maven-surefire-plugin
+      commands:
+        - 'mvn clean'
+        - 'mvn test'
+
+      # [Gradle]
+      # commands:
+      #  - 'gradle test'
+
+    build:
+
+      # [Maven] Default to plugin: maven-compiler-plugin
+      commands:
+        - 'mvn -Dmaven.test.skip=true install'
+
+      # [Gradle]
+      # commands:
+      #  - 'gradle clean build -x test'
+
+    publish:
+
+      # [Maven] Default to plugin: maven-deploy-plugin
+      commands:
+        - 'mvn deploy'
+
+      # [Gradle]
+      # commands:
+      #  - 'gradle deploy'
 
 controls:
   
@@ -110,7 +95,7 @@ controls:
   triggerBy:
     
     # Connected source Git repository change [Defaults to true]
-    sourceRepository: true
+    # sourceRepository: true
     
     # Other resource change from other pipelines
     # externalResources:
@@ -143,21 +128,5 @@ controls:
     email:
       integrationName: 'mySMTP' # SMTP
 
-      # [Optional] Defaults to all the steps
-      steps:
-        - frogbot-scan
-        - lint
-        - test
-        - build
-        - deploy
-
     slack:
       integrationName: 'mySlack'
-
-      # [Optional] Defaults to all the steps
-      steps:
-        - frogbot-scan
-        - lint
-        - test
-        - build
-        - deploy

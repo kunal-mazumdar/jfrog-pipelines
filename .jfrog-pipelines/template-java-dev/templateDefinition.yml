@@ -65,7 +65,6 @@ resources:
     type: GitRepo
     configuration:
     {{ range $key, $value := .Values.inputs.sourceRepository }}
-
     {{ $isObject := or (eq $key "files") (eq $key "branches") (eq $key "pullRequestSourceBranches") (eq $key "pullRequestTargetBranches") (eq $key "tags") (eq $key "buildOn") (eq $key "cancelPendingRunsOn") (eq $key "pin") }}
     {{ if (eq $isObject false )}}
       {{ $key }}: {{ $value }}
@@ -75,7 +74,6 @@ resources:
         {{ $depthKey }}: {{ $depthValue }}
       {{ end }}      
     {{ end }}
-
     {{ end }}
 
   - name: {{ $frogbotScanResName }}
