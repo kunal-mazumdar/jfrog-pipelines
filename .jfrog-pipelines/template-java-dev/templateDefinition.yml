@@ -33,10 +33,10 @@
 
 # Commands
 {{ $isCommandsAvailable := default false .Values.configurations.steps }}
-{{ $isMvnLintCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.lint }}
-{{ $isMvnTestCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.test }}
-{{ $isMvnBuildCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.build }}
-{{ $isMvnPublishCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.publish }}
+{{ $isLintCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.lint }}
+{{ $isTestCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.test }}
+{{ $isBuildCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.build }}
+{{ $isPublishCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.publish }}
 
 {{ $mvnDefaultLintCmd := "mvn clean checkstyle:checkstyle" }}
 {{ $mvnDefaultTestCmd := "mvn clean test" }}
@@ -47,6 +47,11 @@
 {{ $gradleDefaultTestCmd := "gradle clean test" }}
 {{ $gradleDefaultBuildCmd := "gradle clean build -x test" }}
 {{ $gradleDefaultPublishCmd := "gradle deploy" }}
+
+{{ $defaultLintCmd  := ternary $gradleDefaultLintCmd $mvnDefaultLintCmd (eq $buildTool "gradle") }}
+{{ $defaultTestCmd  := ternary $gradleDefaultTestCmd $mvnDefaultTestCmd (eq $buildTool "gradle") }}
+{{ $defaultBuildCmd  := ternary $gradleDefaultBuildCmd $mvnDefaultBuildCmd (eq $buildTool "gradle") }}
+{{ $defaultPublishCmd  := ternary $gradleDefaultPublishCmd $mvnDefaultPublishCmd (eq $buildTool "gradle") }}
 
 valuesFilePath: values.yml
 
@@ -140,6 +145,7 @@ pipelines:
           ENABLE_DEBUG_LOGS: '{{ $isDebugLogsEnabled }}'
           ENABLE_EXPORTING_REPORTS: '{{ $isExportingEnabled }}'
           SKIP_FROGBOT_SCAN: 'false'
+          BUILD_TOOL: '{{ $buildTool }} -> {{ or (eq "maven" $buildTool) (eq "gradle" $buildTool) }}'
     steps:
       - name: frogbot_scan
         type: Bash
@@ -196,14 +202,13 @@ pipelines:
             - name: {{ $unitTestResName }}
         execution:          
           onExecute:
-            - echo 'Testing...'
             - pushd ${res_{{ $gitResName }}_resourcePath}
-            {{ if $isMvnTestCmdAvailable }}
+            {{ if $isTestCmdAvailable }}
             {{- range $cmd := .Values.configurations.steps.test.commands }}
             - {{ $cmd }}
             {{- end }}
-            {{ else if not (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
-            - {{ $mvnDefaultTestCmd }}
+            {{ else if (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
+            - {{ $defaultTestCmd }}
             {{ end }}
             - popd
 
@@ -221,12 +226,12 @@ pipelines:
           onExecute:
             - echo 'Linting...'
             - pushd ${res_{{ $gitResName }}_resourcePath}
-            {{ if $isMvnLintCmdAvailable }}
+            {{ if $isLintCmdAvailable }}
             {{- range $cmd := .Values.configurations.steps.lint.commands }}
             - {{ $cmd }}
             {{- end }}
-            {{ else if not (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
-            - {{ $mvnDefaultLintCmd }}
+            {{ else if (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
+            - {{ $defaultLintCmd }}
             {{ end }}
             - cp -r * ${shared_workspace}
             - popd
@@ -245,12 +250,12 @@ pipelines:
           onExecute:
             - echo 'Building...'
             - pushd ${shared_workspace}
-            {{ if $isMvnBuildCmdAvailable }}
+            {{ if $isBuildCmdAvailable }}
             {{- range $cmd := .Values.configurations.steps.build.commands }}
             - {{ $cmd }}
             {{- end }}
-            {{ else if not (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
-            - {{ $mvnDefaultBuildCmd }}
+            {{ else if (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
+            - {{ $defaultBuildCmd }}
             {{ end }}
             - popd
 
@@ -269,11 +274,11 @@ pipelines:
           onExecute:
             - echo 'Publishing...'
             - pushd ${shared_workspace}
-            {{ if $isMvnPublishCmdAvailable }}
+            {{ if $isPublishCmdAvailable }}
             {{- range $cmd := .Values.configurations.steps.publish.commands }}
             - {{ $cmd }}
             {{- end }}
-            {{ else if not (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
-            - {{ $mvnDefaultPublishCmd }}
+            {{ else if (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
+            - {{ $defaultPublishCmd }}
             {{ end }}
             - popd
