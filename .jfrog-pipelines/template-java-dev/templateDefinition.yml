@@ -32,16 +32,21 @@
 {{ $isSlackNotificationsAvailable := default false (and $isNotificationsAvailable .Values.controls.notifications.slack) }}
 
 # Commands
-{{ $isCommandsAvailable := default false .Values.configurations.commands }}
-{{ $isMvnLintCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.lint }}
-{{ $isMvnTestCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.test }}
-{{ $isMvnBuildCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.build }}
-{{ $isMvnPublishCmdAvailable := and $isCommandsAvailable .Values.configurations.commands.publish }}
+{{ $isCommandsAvailable := default false .Values.configurations.steps }}
+{{ $isMvnLintCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.lint }}
+{{ $isMvnTestCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.test }}
+{{ $isMvnBuildCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.build }}
+{{ $isMvnPublishCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.publish }}
 
 {{ $mvnDefaultLintCmd := "mvn clean checkstyle:checkstyle" }}
 {{ $mvnDefaultTestCmd := "mvn clean test" }}
 {{ $mvnDefaultBuildCmd := "mvn -Dmaven.test.skip=true install" }}
 {{ $mvnDefaultPublishCmd := "mvn deploy" }}
+
+{{ $gradleDefaultLintCmd := "gradle clean lint" }}
+{{ $gradleDefaultTestCmd := "gradle clean test" }}
+{{ $gradleDefaultBuildCmd := "gradle clean build -x test" }}
+{{ $gradleDefaultPublishCmd := "gradle deploy" }}
 
 valuesFilePath: values.yml
 
@@ -133,6 +138,7 @@ pipelines:
       environmentVariables:
         readOnly:
           ENABLE_DEBUG_LOGS: '{{ $isDebugLogsEnabled }}'
+          ENABLE_EXPORTING_REPORTS: '{{ $isExportingEnabled }}'
           SKIP_FROGBOT_SCAN: 'false'
     steps:
       - name: frogbot_scan
@@ -193,10 +199,10 @@ pipelines:
             - echo 'Testing...'
             - pushd ${res_{{ $gitResName }}_resourcePath}
             {{ if $isMvnTestCmdAvailable }}
-            {{- range $cmd := .Values.configurations.commands.test.commands }}
+            {{- range $cmd := .Values.configurations.steps.test.commands }}
             - {{ $cmd }}
             {{- end }}
-            {{ else }}
+            {{ else if not (or (eq 'maven' $buildTool) (eq 'gradle' $buildTool)) }}
             - {{ $mvnDefaultTestCmd }}
             {{ end }}
             - popd
@@ -216,10 +222,10 @@ pipelines:
             - echo 'Linting...'
             - pushd ${res_{{ $gitResName }}_resourcePath}
             {{ if $isMvnLintCmdAvailable }}
-            {{- range $cmd := .Values.configurations.commands.lint.commands }}
+            {{- range $cmd := .Values.configurations.steps.lint.commands }}
             - {{ $cmd }}
             {{- end }}
-            {{ else }}
+            {{ else if not (or (eq 'maven' $buildTool) (eq 'gradle' $buildTool)) }}
             - {{ $mvnDefaultLintCmd }}
             {{ end }}
             - cp -r * ${shared_workspace}
@@ -240,10 +246,10 @@ pipelines:
             - echo 'Building...'
             - pushd ${shared_workspace}
             {{ if $isMvnBuildCmdAvailable }}
-            {{- range $cmd := .Values.configurations.commands.build.commands }}
+            {{- range $cmd := .Values.configurations.steps.build.commands }}
             - {{ $cmd }}
             {{- end }}
-            {{ else }}
+            {{ else if not (or (eq 'maven' $buildTool) (eq 'gradle' $buildTool)) }}
             - {{ $mvnDefaultBuildCmd }}
             {{ end }}
             - popd
@@ -264,10 +270,10 @@ pipelines:
             - echo 'Publishing...'
             - pushd ${shared_workspace}
             {{ if $isMvnPublishCmdAvailable }}
-            {{- range $cmd := .Values.configurations.commands.publish.commands }}
+            {{- range $cmd := .Values.configurations.steps.publish.commands }}
             - {{ $cmd }}
             {{- end }}
-            {{ else }}
+            {{ else if not (or (eq 'maven' $buildTool) (eq 'gradle' $buildTool)) }}
             - {{ $mvnDefaultPublishCmd }}
             {{ end }}
             - popd

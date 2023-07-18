@@ -1,0 +1,27 @@
+metadata:
+  appName:  dream_app_homepage
+
+inputs:
+  sourceRepository:
+    path: kunal-mazumdar/gradle-java
+    gitProvider: kunal_gh
+    branches:
+      include: main
+  integrations:
+    artifactoryToken: jf_token
+
+configurations:
+  buildTool: 'gradle'
+  commands:
+    lint:
+      commands:
+        - 'gradle lint'
+    test:
+      commands:
+        - 'gradle test'
+    build:
+      commands:
+        - 'gradle clean build -x test'
+    publish:
+      commands:
+        - 'gradle deploy'

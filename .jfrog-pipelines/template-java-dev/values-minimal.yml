@@ -1,0 +1,19 @@
+######################################
+# Minimal configuration values file
+# Ubuntu 18 Java 17
+# Maven 3.8.5
+# Executes with default Maven commands
+######################################
+
+metadata:
+  appName:  dream_app_homepage
+
+inputs:
+  sourceRepository:
+    path: kunal-mazumdar/simple-java-maven-app
+    gitProvider: kunal_gh
+    branches:
+      include: master
+
+  integrations:
+    artifactoryToken: jf_token
