@@ -202,7 +202,7 @@ pipelines:
             {{- range $cmd := .Values.configurations.steps.test.commands }}
             - {{ $cmd }}
             {{- end }}
-            {{ else if not (or (eq 'maven' $buildTool) (eq 'gradle' $buildTool)) }}
+            {{ else if not (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
             - {{ $mvnDefaultTestCmd }}
             {{ end }}
             - popd
@@ -225,7 +225,7 @@ pipelines:
             {{- range $cmd := .Values.configurations.steps.lint.commands }}
             - {{ $cmd }}
             {{- end }}
-            {{ else if not (or (eq 'maven' $buildTool) (eq 'gradle' $buildTool)) }}
+            {{ else if not (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
             - {{ $mvnDefaultLintCmd }}
             {{ end }}
             - cp -r * ${shared_workspace}
@@ -249,7 +249,7 @@ pipelines:
             {{- range $cmd := .Values.configurations.steps.build.commands }}
             - {{ $cmd }}
             {{- end }}
-            {{ else if not (or (eq 'maven' $buildTool) (eq 'gradle' $buildTool)) }}
+            {{ else if not (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
             - {{ $mvnDefaultBuildCmd }}
             {{ end }}
             - popd
@@ -273,7 +273,7 @@ pipelines:
             {{- range $cmd := .Values.configurations.steps.publish.commands }}
             - {{ $cmd }}
             {{- end }}
-            {{ else if not (or (eq 'maven' $buildTool) (eq 'gradle' $buildTool)) }}
+            {{ else if not (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
             - {{ $mvnDefaultPublishCmd }}
             {{ end }}
             - popd
