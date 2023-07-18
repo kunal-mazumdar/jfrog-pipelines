@@ -10,7 +10,7 @@
 {{ $buildInfoResName := print $appName "_build_info" }}
 {{ $cronResName := print $appName "_cron" }}
 {{ $pipelineName := print $appName "_build" }}
-{{ $rootDirectory := default "" .Values.configurations.sourceDirectory }}
+{{ $rootDirectory := ternary (print "/" .Values.configurations.sourceDirectory) "" .Values.configurations.sourceDirectory }}
 
 # Build Trigger
 {{ $buildTool := default "maven" .Values.configurations.buildTool }}
@@ -193,8 +193,7 @@ pipelines:
             - name: {{ $codeQualityResName }}
         execution:          
           onExecute:
-            - pushd ${res_{{ $gitResName }}_resourcePath}
-            - pushd {{ $rootDirectory }}
+            - pushd ${res_{{ $gitResName }}_resourcePath}{{ $rootDirectory }}
             {{ if $isQualityCmdAvailable }}
             {{- range $cmd := .Values.configurations.steps.codeQuality.commands }}
             - {{ $cmd }}
@@ -202,7 +201,6 @@ pipelines:
             {{ else if (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
             - {{ $defaultQualityCmd }}
             {{ end }}
-            - popd
             - popd
 
       - name: unit_tests
@@ -216,8 +214,7 @@ pipelines:
             - name: {{ $unitTestResName }}
         execution:          
           onExecute:
-            - pushd ${res_{{ $gitResName }}_resourcePath}
-            - pushd {{ $rootDirectory }}
+            - pushd ${res_{{ $gitResName }}_resourcePath}{{ $rootDirectory }}
             {{ if $isTestCmdAvailable }}
             {{- range $cmd := .Values.configurations.steps.test.commands }}
             - {{ $cmd }}
@@ -225,7 +222,6 @@ pipelines:
             {{ else if (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
             - {{ $defaultTestCmd }}
             {{ end }}
-            - popd
             - popd
 
       - name: lint
@@ -240,8 +236,7 @@ pipelines:
             - name: {{ $buildInfoResultResName }}
         execution:          
           onExecute:
-            - pushd ${res_{{ $gitResName }}_resourcePath}
-            - pushd {{ $rootDirectory }}
+            - pushd ${res_{{ $gitResName }}_resourcePath}{{ $rootDirectory }}
             {{ if $isLintCmdAvailable }}
             {{- range $cmd := .Values.configurations.steps.lint.commands }}
             - {{ $cmd }}
@@ -249,7 +244,6 @@ pipelines:
             {{ else if (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
             - {{ $defaultLintCmd }}
             {{ end }}
-            - popd
             - cp -r * ${shared_workspace}
             - popd
 
@@ -265,8 +259,7 @@ pipelines:
             - name: {{ $buildInfoResultResName }}
         execution:
           onExecute:
-            - pushd ${shared_workspace}
-            - pushd {{ $rootDirectory }}
+            - pushd ${shared_workspace}{{ $rootDirectory }}
             {{ if $isBuildCmdAvailable }}
             {{- range $cmd := .Values.configurations.steps.build.commands }}
             - {{ $cmd }}
@@ -274,7 +267,6 @@ pipelines:
             {{ else if (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
             - {{ $defaultBuildCmd }}
             {{ end }}
-            - popd
             - popd
 
       - name: publish
@@ -298,8 +290,7 @@ pipelines:
             - name: {{ $buildInfoResName }}
         execution:
           onExecute:
-            - pushd ${shared_workspace}
-            - pushd {{ $rootDirectory }}
+            - pushd ${shared_workspace}{{ $rootDirectory }}
             {{ if $isPublishCmdAvailable }}
             {{- range $cmd := .Values.configurations.steps.publish.commands }}
             - {{ $cmd }}
@@ -307,5 +298,4 @@ pipelines:
             {{ else if (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
             - {{ $defaultPublishCmd }}
             {{ end }}
-            - popd
             - popd
