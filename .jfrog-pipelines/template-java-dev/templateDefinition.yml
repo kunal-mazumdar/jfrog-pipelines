@@ -278,6 +278,9 @@ pipelines:
             - name: build
               status:
                 - success
+            - name: unit_tests
+              status:
+                - success
           outputResources:
             - name: {{ $buildInfoResultResName }}
             - name: {{ $buildInfoResName }}
