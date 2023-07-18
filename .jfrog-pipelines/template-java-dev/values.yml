@@ -50,45 +50,45 @@ configurations:
 #      # [Optional] Default to false
 #      skip: false
 
-    test:
+#    test:
+#
+#      # [Maven] Default to plugin: maven-surefire-plugin
+#      commands:
+#        - 'mvn clean'
+#        - 'mvn test'
+#
+#      # [Gradle]
+#      # commands:
+#      #  - './gradlew test'
+#
+#      # [Optional] Default to false
+#      skip: false
 
-      # [Maven] Default to plugin: maven-surefire-plugin
-      commands:
-        - 'mvn clean'
-        - 'mvn test'
-
-      # [Gradle]
-      # commands:
-      #  - './gradlew test'
-
-      # [Optional] Default to false
-      skip: false
-
-    build:
-
-      # [Maven] Default to plugin: maven-compiler-plugin
-      commands: 
-        - 'mvn -Dmaven.test.skip=true install'
-      
-      # [Gradle]
-      # commands: 
-      #  - './gradlew clean build -x test'
-
-      # [Optional] Default to false
-      skip: false
-
-    publish:
-
-      # [Maven] Default to plugin: maven-deploy-plugin
-      commands:
-        - 'mvn deploy'
-      
-      # [Gradle]
-      # commands:
-      #  - './gradlew deploy'
-      
-      # [Optional] Default to false
-      skip: false
+#    build:
+#
+#      # [Maven] Default to plugin: maven-compiler-plugin
+#      commands:
+#        - 'mvn -Dmaven.test.skip=true install'
+#
+#      # [Gradle]
+#      # commands:
+#      #  - './gradlew clean build -x test'
+#
+#      # [Optional] Default to false
+#      skip: false
+#
+#    publish:
+#
+#      # [Maven] Default to plugin: maven-deploy-plugin
+#      commands:
+#        - 'mvn deploy'
+#
+#      # [Gradle]
+#      # commands:
+#      #  - './gradlew deploy'
+#
+#      # [Optional] Default to false
+#      skip: false
 
 controls:
   
