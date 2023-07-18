@@ -4,7 +4,7 @@ metadata:
   # [Required] All the underlying pipelines & resources names will be prefixed with appName for easy identifications & search
   appName:  dream_app_homepage_1
 
-  java:
+  java: "17"
 
 # [Required]
 inputs:
@@ -46,6 +46,19 @@ configurations:
 #      # [Gradle]
 #      # commands:
 #      #  -  './gradlew lint'
+#
+#      # [Optional] Default to false
+#      skip: false
+
+#    codeQuality:
+#
+#      # [Maven] Default to plugin: maven-checkstyle-plugin
+#      commands:
+#        - 'mvn clean sonar:sonar'
+#
+#      # [Gradle]
+#      # commands:
+#      #  - 'gradle sonar'
 #
 #      # [Optional] Default to false
 #      skip: false

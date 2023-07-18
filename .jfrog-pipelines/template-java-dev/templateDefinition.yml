@@ -34,21 +34,25 @@
 # Commands
 {{ $isCommandsAvailable := default false .Values.configurations.steps }}
 {{ $isLintCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.lint }}
+{{ $isQualityCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.codeQuality }}
 {{ $isTestCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.test }}
 {{ $isBuildCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.build }}
 {{ $isPublishCmdAvailable := and $isCommandsAvailable .Values.configurations.steps.publish }}
 
 {{ $mvnDefaultLintCmd := "mvn clean checkstyle:checkstyle" }}
+{{ $mvnDefaultQualityCmd := "mvn clean sonar:sonar" }}
 {{ $mvnDefaultTestCmd := "mvn clean test" }}
 {{ $mvnDefaultBuildCmd := "mvn -Dmaven.test.skip=true install" }}
 {{ $mvnDefaultPublishCmd := "mvn deploy" }}
 
 {{ $gradleDefaultLintCmd := "gradle clean lint" }}
+{{ $gradleDefaultQualityCmd := "gradle clean sonar" }}
 {{ $gradleDefaultTestCmd := "gradle clean test" }}
 {{ $gradleDefaultBuildCmd := "gradle clean build -x test" }}
 {{ $gradleDefaultPublishCmd := "gradle deploy" }}
 
 {{ $defaultLintCmd  := ternary $gradleDefaultLintCmd $mvnDefaultLintCmd (eq $buildTool "gradle") }}
+{{ $defaultQualityCmd  := ternary $gradleDefaultQualityCmd $mvnDefaultQualityCmd (eq $buildTool "gradle") }}
 {{ $defaultTestCmd  := ternary $gradleDefaultTestCmd $mvnDefaultTestCmd (eq $buildTool "gradle") }}
 {{ $defaultBuildCmd  := ternary $gradleDefaultBuildCmd $mvnDefaultBuildCmd (eq $buildTool "gradle") }}
 {{ $defaultPublishCmd  := ternary $gradleDefaultPublishCmd $mvnDefaultPublishCmd (eq $buildTool "gradle") }}
@@ -188,7 +192,15 @@ pipelines:
             - name: {{ $codeQualityResName }}
         execution:          
           onExecute:
-            - echo 'Executing sonar...'
+            - pushd ${res_{{ $gitResName }}_resourcePath}
+            {{ if $isQualityCmdAvailable }}
+            {{- range $cmd := .Values.configurations.steps.codeQuality.commands }}
+            - {{ $cmd }}
+            {{- end }}
+            {{ else if (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
+            - {{ $defaultQualityCmd }}
+            {{ end }}
+            - popd
 
       - name: unit_tests
         type: Bash
