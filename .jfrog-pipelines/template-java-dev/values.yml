@@ -28,7 +28,7 @@ inputs:
 configurations:
 
   # [Optional] Defaults to Maven
-  buildTool: 'gradle'
+  buildTool: 'maven'
 
   # [Optional] Defaults to repository root folder
   sourceDirectory: '.'
