@@ -10,7 +10,7 @@
 {{ $buildInfoResName := print $appName "_build_info" }}
 {{ $cronResName := print $appName "_cron" }}
 {{ $pipelineName := print $appName "_build" }}
-{{ $rootDirectory := ternary (print "/" .Values.configurations.sourceDirectory) "" .Values.configurations.sourceDirectory }}
+{{ $rootDirectory := ternary (print "/" .Values.configurations.sourceDirectory) "" (not (eq "" .Values.configurations.sourceDirectory)) }}
 
 # Build Trigger
 {{ $buildTool := default "maven" .Values.configurations.buildTool }}
