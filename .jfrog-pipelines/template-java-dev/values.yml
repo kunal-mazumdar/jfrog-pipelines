@@ -2,7 +2,7 @@
 metadata:
   
   # [Required] All the underlying pipelines & resources names will be prefixed with appName for easy identifications & search
-  appName:  dream_app_homepage_1
+  appName:  dream_app_homepage_2
 
   java: "17"
 
@@ -13,10 +13,10 @@ inputs:
   sourceRepository:
     # ... Support all the Git Resource configuration properties ...
     # https://jfrog.com/help/r/jfrog-pipelines-documentation/gitrepo
-    path: kunal-mazumdar/gradle-java
+    path: kunal-mazumdar/simple-java-maven-app
     gitProvider: kunal_gh
     branches:
-      include: main
+      include: master
 
   # [Required]
   integrations:
@@ -31,7 +31,7 @@ configurations:
   buildTool: 'maven'
 
   # [Optional] Defaults to repository root folder
-  sourceDirectory: '.'
+  sourceDirectory: ''
 
   # [Optional] When buildTool = Maven/Gradle
   # [Required] When buildTool = Other
