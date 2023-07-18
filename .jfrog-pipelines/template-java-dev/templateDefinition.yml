@@ -145,7 +145,6 @@ pipelines:
           ENABLE_DEBUG_LOGS: '{{ $isDebugLogsEnabled }}'
           ENABLE_EXPORTING_REPORTS: '{{ $isExportingEnabled }}'
           SKIP_FROGBOT_SCAN: 'false'
-          BUILD_TOOL: '{{ $buildTool }} -> {{ or (eq "maven" $buildTool) (eq "gradle" $buildTool) }}'
     steps:
       - name: frogbot_scan
         type: Bash
