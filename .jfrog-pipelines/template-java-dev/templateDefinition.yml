@@ -79,13 +79,25 @@ valuesFilePath: values.yml
   {{ end }}
 {{ end }}
 
-# Frogbot step
+# frogbot step
 {{ define "step.frogbot.onExecute" }}
   {{ if eq . "PowerShell" }}
             - Write-Output "Executing Frogbot scan..."
   {{ else }}
             - echo "Executing Frogbot scan..."
   {{ end }}
+{{ end }}
+
+# code_quality step
+{{ define "step.codeQuality.onExecute" }}
+            - cd ${res_{{ $gitResName }}_resourcePath}{{ $rootDirectory }}
+            {{ if $isQualityCmdAvailable }}
+            {{- range $cmd := .Values.configurations.steps.codeQuality.commands }}
+            - {{ $cmd }}
+            {{- end }}
+            {{ else if (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
+            - {{ $defaultQualityCmd }}
+            {{ end }}
 {{ end }}
 
 # Resource definitions
@@ -223,15 +235,7 @@ pipelines:
             - name: {{ $codeQualityResName }}
         execution:
           onExecute:
-            - pushd ${res_{{ $gitResName }}_resourcePath}{{ $rootDirectory }}
-            {{ if $isQualityCmdAvailable }}
-            {{- range $cmd := .Values.configurations.steps.codeQuality.commands }}
-            - {{ $cmd }}
-            {{- end }}
-            {{ else if (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
-            - {{ $defaultQualityCmd }}
-            {{ end }}
-            - popd
+            {{ template "step.codeQuality.onExecute" $stepType }}
 
       - name: unit_tests
         type: {{ $stepType }}
