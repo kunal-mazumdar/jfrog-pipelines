@@ -2,16 +2,28 @@
 metadata:
   
   # [Required] All the underlying pipelines & resources names will be prefixed with appName for easy identifications & search
-  appName:  dream_app_homepage_2
+  packageName:  dream_app_homepage_2
 
+  # [Optional]
   java: "17"
+
+  # [Optional] Defaults to Ubuntu18 with Java 17
+  # Allows to configure custom runtime, support all the configuration properties under runtime.image.custom
+  runtime:
+    registry: docker
+    sourceRepository: apps-docker-local
+    name: test.mycompany.io/apps-docker-local/ci/builder-node14
+    tag: 1.0.0
+
+  # [Optional] If not provided then default nodePool configured in platform will be used
+  nodePool: some_nodepool
 
 # [Required]
 inputs:
 
   # [Required] Configure Git repository where application code is present
   sourceRepository:
-    # ... Support all the Git Resource configuration properties ...
+    # Support all the Git Resource configuration properties
     # https://jfrog.com/help/r/jfrog-pipelines-documentation/gitrepo
     path: kunal-mazumdar/simple-java-maven-app
     gitProvider: kunal_gh

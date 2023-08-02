@@ -1,15 +1,15 @@
 # Template Variables
 
 # Names
-{{ $appName := .Values.metadata.appName }}
-{{ $gitResName := print $appName "_git_source" }}
-{{ $frogbotScanResName := print $appName "_frogbot_scan_result" }}
-{{ $codeQualityResName := print $appName "_code_quality_result" }}
-{{ $unitTestResName := print $appName "_unit_test_result" }}
-{{ $buildInfoResultResName := print $appName "_build_result" }}
-{{ $buildInfoResName := print $appName "_build_info" }}
-{{ $cronResName := print $appName "_cron" }}
-{{ $pipelineName := print $appName "_build" }}
+{{ $packageName := .Values.metadata.packageName }}
+{{ $gitResName := print $packageName "_git_source" }}
+{{ $frogbotScanResName := print $packageName "_frogbot_scan_result" }}
+{{ $codeQualityResName := print $packageName "_code_quality_result" }}
+{{ $unitTestResName := print $packageName "_unit_test_result" }}
+{{ $buildInfoResultResName := print $packageName "_build_result" }}
+{{ $buildInfoResName := print $packageName "_build_info" }}
+{{ $cronResName := print $packageName "_cron" }}
+{{ $pipelineName := print $packageName "_build" }}
 {{ $rootDirectory := ternary (print "/" .Values.configurations.sourceDirectory) "" (not (eq "" .Values.configurations.sourceDirectory)) }}
 
 # Build Trigger
@@ -58,23 +58,28 @@
 {{ $defaultBuildCmd  := ternary $gradleDefaultBuildCmd $mvnDefaultBuildCmd (eq $buildTool "gradle") }}
 {{ $defaultPublishCmd  := ternary $gradleDefaultPublishCmd $mvnDefaultPublishCmd (eq $buildTool "gradle") }}
 
-valuesFilePath: values.yml
+# Reusable templates
+# These are resolved using 'template' thus indentation is important
+{{ define "res.gitRepo.config" }}
+{{ range $key, $value := .Values.inputs.sourceRepository }}
+{{ $isObject := or (eq $key "files") (eq $key "branches") (eq $key "pullRequestSourceBranches") (eq $key "pullRequestTargetBranches") (eq $key "tags") (eq $key "buildOn") (eq $key "cancelPendingRunsOn") (eq $key "pin") }}
+{{ if (eq $isObject false )}}
+      {{ $key }}: {{ $value }}
+{{ else }}
+      {{ $key }}:
+{{ range $depthKey, $depthValue := $value }}
+        {{ $depthKey }}: {{ $depthValue }}
+{{ end }}
+{{ end }}
+{{ end }}
+{{ end }}
 
+# Resource definitions
 resources:
   - name: {{ $gitResName }}
     type: GitRepo
     configuration:
-    {{ range $key, $value := .Values.inputs.sourceRepository }}
-    {{ $isObject := or (eq $key "files") (eq $key "branches") (eq $key "pullRequestSourceBranches") (eq $key "pullRequestTargetBranches") (eq $key "tags") (eq $key "buildOn") (eq $key "cancelPendingRunsOn") (eq $key "pin") }}
-    {{ if (eq $isObject false )}}
-      {{ $key }}: {{ $value }}
-    {{ else }}
-      {{ $key }}:
-      {{ range $depthKey, $depthValue := $value }}
-        {{ $depthKey }}: {{ $depthValue }}
-      {{ end }}      
-    {{ end }}
-    {{ end }}
+      {{ template "res.gitRepo.config" . }}
 
   - name: {{ $frogbotScanResName }}
     type: PropertyBag
@@ -87,7 +92,7 @@ resources:
     configuration:
       timestamp: ''
       reportUrl: ''
-  
+
   - name: {{ $unitTestResName }}
     type: PropertyBag
     configuration:
@@ -101,7 +106,7 @@ resources:
       lintStatus: ''
       buildStatus: ''
       publishStatus: ''
-  
+
   - name: {{ $buildInfoResName }}
     type: BuildInfo
     configuration:
@@ -118,23 +123,30 @@ resources:
 
   {{ if $isWebhookTriggerEnabled }}
   {{- range $webhook := .Values.controls.triggerBy.incomingWebhooks }}
-  - name: "{{ $appName }}_webhook_{{ $webhook.webhookName }}"
+  - name: "{{ $packageName }}_webhook_{{ $webhook.webhookName }}"
     type: IncomingWebhook
     configuration:
       webhookName: {{ $webhook.webhookName }}
   {{ end }}
   {{ end }}
 
+# Pipeline definition
 pipelines:
   - name: {{ $pipelineName }}
     configuration:
       runtime:
         type: image
         image:
+          {{ if .Values.metadata.runtime }}
+          {{ range $key, $value := .Values.metadata.runtime }}
+          {{ $key }}: {{ $value }}
+          {{ end }}
+          {{ else }}
           auto:
             language: java
             versions:
               - "17"
+          {{ end }}
       integrations:
         - name: {{ .Values.inputs.integrations.artifactoryToken }}
         {{ if $isEmailNotificationsAvailable}}
@@ -143,11 +155,16 @@ pipelines:
         {{ if $isSlackNotificationsAvailable }}
         - name: {{ .Values.controls.notifications.slack.integrationName }}
         {{ end }}
+
+      # Setting nodePool
+      {{ if .Values.metadata.nodePool }}
+      nodePool: {{ .Values.metadata.nodePool }}
+      {{ end }}
+
       environmentVariables:
         readOnly:
           ENABLE_DEBUG_LOGS: '{{ $isDebugLogsEnabled }}'
           ENABLE_EXPORTING_REPORTS: '{{ $isExportingEnabled }}'
-          SKIP_FROGBOT_SCAN: 'false'
     steps:
       - name: frogbot_scan
         type: Bash
@@ -155,7 +172,7 @@ pipelines:
           inputResources:
             - name: {{ $gitResName }}
               trigger: {{ $isGitTriggerEnabled }}
-            
+
             # Enable trigger options via external resources
             {{ if $isExternalTriggerAvailable }}
             {{- range $resource := .Values.controls.triggerBy.externalResources }}
@@ -171,12 +188,12 @@ pipelines:
             # Enable incoming webhook triggers
             {{ if $isWebhookTriggerEnabled }}
             {{- range $webhook := .Values.controls.triggerBy.incomingWebhooks }}
-            - name: "{{ $appName }}_webhook_{{ $webhook.webhookName }}"
+            - name: "{{ $packageName }}_webhook_{{ $webhook.webhookName }}"
             {{ end }}
             {{ end }}
           outputResources:
             - name: {{ $frogbotScanResName }}
-        execution:          
+        execution:
           onExecute:
             - echo 'Executing Frogbot scan...'
 
@@ -189,7 +206,7 @@ pipelines:
             - name: {{ $gitResName }}
           outputResources:
             - name: {{ $codeQualityResName }}
-        execution:          
+        execution:
           onExecute:
             - pushd ${res_{{ $gitResName }}_resourcePath}{{ $rootDirectory }}
             {{ if $isQualityCmdAvailable }}
@@ -210,7 +227,7 @@ pipelines:
             - name: {{ $gitResName }}
           outputResources:
             - name: {{ $unitTestResName }}
-        execution:          
+        execution:
           onExecute:
             - pushd ${res_{{ $gitResName }}_resourcePath}{{ $rootDirectory }}
             {{ if $isTestCmdAvailable }}
@@ -232,7 +249,7 @@ pipelines:
             - name: {{ $gitResName }}
           outputResources:
             - name: {{ $buildInfoResultResName }}
-        execution:          
+        execution:
           onExecute:
             - pushd ${res_{{ $gitResName }}_resourcePath}{{ $rootDirectory }}
             {{ if $isLintCmdAvailable }}
