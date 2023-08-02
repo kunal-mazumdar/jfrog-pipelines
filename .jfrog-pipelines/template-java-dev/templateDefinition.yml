@@ -63,6 +63,8 @@ valuesFilePath: values.yml
 
 # Reusable templates
 # These are resolved using 'template' thus indentation is important
+
+# Git repo resource
 {{ define "res.gitRepo.config" }}
   {{ range $key, $value := .Values.inputs.sourceRepository }}
   {{ $isObject := or (eq $key "files") (eq $key "branches") (eq $key "pullRequestSourceBranches") (eq $key "pullRequestTargetBranches") (eq $key "tags") (eq $key "buildOn") (eq $key "cancelPendingRunsOn") (eq $key "pin") }}
@@ -74,6 +76,15 @@ valuesFilePath: values.yml
         {{ $depthKey }}: {{ $depthValue }}
   {{ end }}
   {{ end }}
+  {{ end }}
+{{ end }}
+
+# Frogbot step
+{{ define "step.frogbot.onExecute" }}
+  {{ if eq $stepType "PowerShell" }}
+            - Write-Output "Executing Frogbot scan..."
+  {{ else }}
+            - echo "Executing Frogbot scan..."
   {{ end }}
 {{ end }}
 
@@ -199,7 +210,7 @@ pipelines:
             - name: {{ $frogbotScanResName }}
         execution:
           onExecute:
-            - echo 'Executing Frogbot scan...'
+            {{ template "step.frogbot.onExecute" . }}
 
       - name: code_quality
         type: {{ $stepType }}
