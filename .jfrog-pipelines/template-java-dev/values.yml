@@ -12,6 +12,7 @@ metadata:
 
   # [Optional] Defaults to Ubuntu18 with Java 17
   # Allows to configure custom runtime, support all the configuration properties under runtime.image.custom
+  # Ref: https://jfrog.com/help/r/jfrog-pipelines-documentation/choosing-your-runtime-image
   #  runtime:
   #    registry: docker
   #    sourceRepository: apps-docker-local
@@ -27,7 +28,7 @@ inputs:
   # [Required] Configure Git repository where application code is present
   sourceRepository:
     # Support all the Git Resource configuration properties
-    # https://jfrog.com/help/r/jfrog-pipelines-documentation/gitrepo
+    # Ref: https://jfrog.com/help/r/jfrog-pipelines-documentation/gitrepo
     path: kunal-mazumdar/simple-java-maven-app
     gitProvider: kunal_gh
     branches:
