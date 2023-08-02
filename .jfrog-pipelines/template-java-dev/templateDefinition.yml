@@ -63,6 +63,7 @@ valuesFilePath: values.yml
 
 # Reusable templates
 # These are resolved using 'template' thus indentation is important
+{{ $templateParams := dict "gitResName" $gitResName "rootDirectory" $rootDirectory "isQualityCmdAvailable" $isQualityCmdAvailable "buildTool" $buildTool "defaultQualityCmd" $defaultQualityCmd }}
 
 # Git repo resource
 {{ define "res.gitRepo.config" }}
@@ -90,16 +91,17 @@ valuesFilePath: values.yml
 
 # code_quality step
 {{ define "step.codeQuality.onExecute" }}
-            - cd ${res_{{ (get . "gitResName") }}_resourcePath}{{ (get . "rootDirectory") }}
-            - {{ . }}
-            - {{ (get . "isQualityCmdAvailable") }}
-            {{ if (get . "isQualityCmdAvailable") }}
-            {{- range $cmd := .Values.configurations.steps.codeQuality.commands }}
-            - {{ $cmd }}
-            {{- end }}
-            {{ else if (or (eq "maven" (get . "buildTool")) (eq "gradle" (get . "buildTool"))) }}
-            - {{ (get . "defaultQualityCmd") }}
-            {{ end }}
+  {{ . }}
+#  {{ $conf := (get . "isQualityCmdAvailable") }}
+#  {{ $buildTool = (get . "buildTool") }}
+#            - cd ${res_{{ (get . "gitResName") }}_resourcePath}{{ (get . "rootDirectory") }}
+#            {{ if $conf }}
+#            {{- range $cmd := $conf.commands }}
+#            - {{ $cmd }}
+#            {{- end }}
+#            {{ else if (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
+#            - {{ (get . "defaultQualityCmd") }}
+#            {{ end }}
 {{ end }}
 
 # Resource definitions
@@ -237,8 +239,7 @@ pipelines:
             - name: {{ $codeQualityResName }}
         execution:
           onExecute:
-            {{ $params := dict "gitResName" $gitResName "rootDirectory" $rootDirectory "isQualityCmdAvailable" $isQualityCmdAvailable "buildTool" $buildTool "defaultQualityCmd" $defaultQualityCmd }}
-            {{ template "step.codeQuality.onExecute" $params }}
+            {{ template "step.codeQuality.onExecute" $templateParams }}
 
       - name: unit_tests
         type: {{ $stepType }}
