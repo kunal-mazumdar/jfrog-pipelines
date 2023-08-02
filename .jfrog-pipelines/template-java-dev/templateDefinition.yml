@@ -91,6 +91,8 @@ valuesFilePath: values.yml
 # code_quality step
 {{ define "step.codeQuality.onExecute" }}
             - cd ${res_{{ (get . "gitResName") }}_resourcePath}{{ (get . "rootDirectory") }}
+            - {{ . }}
+            - {{ (get . "isQualityCmdAvailable") }}
             {{ if (get . "isQualityCmdAvailable") }}
             {{- range $cmd := .Values.configurations.steps.codeQuality.commands }}
             - {{ $cmd }}
