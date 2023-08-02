@@ -91,12 +91,12 @@ valuesFilePath: values.yml
 # code_quality step
 {{ define "step.codeQuality.onExecute" }}
             - cd ${res_{{ (get . "gitResName") }}_resourcePath}{{ (get . "rootDirectory") }}
-            {{ if $isQualityCmdAvailable }}
+            {{ if (get . "isQualityCmdAvailable") }}
             {{- range $cmd := .Values.configurations.steps.codeQuality.commands }}
             - {{ $cmd }}
             {{- end }}
-            {{ else if (or (eq "maven" $buildTool) (eq "gradle" $buildTool)) }}
-            - {{ $defaultQualityCmd }}
+            {{ else if (or (eq "maven" (get . "buildTool")) (eq "gradle" (get . "buildTool"))) }}
+            - {{ (get . "defaultQualityCmd") }}
             {{ end }}
 {{ end }}
 
@@ -235,7 +235,7 @@ pipelines:
             - name: {{ $codeQualityResName }}
         execution:
           onExecute:
-            {{ params := dict "gitResName" $gitResName "rootDirectory" $rootDirectory }}
+            {{ params := dict "gitResName" $gitResName "rootDirectory" $rootDirectory "isQualityCmdAvailable" $isQualityCmdAvailable "buildTool" $buildTool "defaultQualityCmd" $defaultQualityCmd }}
             {{ template "step.codeQuality.onExecute" $params }}
 
       - name: unit_tests
