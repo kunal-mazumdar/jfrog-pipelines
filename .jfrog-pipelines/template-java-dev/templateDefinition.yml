@@ -138,9 +138,9 @@ pipelines:
       runtime:
         type: image
         image:
-          custom:
           {{ if .Values.metadata.runtime }}
-            {{ range $key, $value := .Values.metadata.runtime }}
+          custom:
+          {{ range $key, $value := .Values.metadata.runtime }}
             {{ $key }}: {{ $value }}
           {{ end }}
           {{ else }}
