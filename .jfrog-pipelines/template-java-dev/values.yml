@@ -9,14 +9,14 @@ metadata:
 
   # [Optional] Defaults to Ubuntu18 with Java 17
   # Allows to configure custom runtime, support all the configuration properties under runtime.image.custom
-  runtime:
-    registry: docker
-    sourceRepository: apps-docker-local
-    name: test.mycompany.io/apps-docker-local/ci/builder-node14
-    tag: 1.0.0
+  #  runtime:
+  #    registry: docker
+  #    sourceRepository: apps-docker-local
+  #    name: test.mycompany.io/apps-docker-local/ci/builder-node14
+  #    tag: 1.0.0
 
   # [Optional] If not provided then default nodePool configured in platform will be used
-  nodePool: some_nodepool
+  #  nodePool: some_nodepool
 
 # [Required]
 inputs:
