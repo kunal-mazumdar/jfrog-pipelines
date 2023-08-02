@@ -81,7 +81,7 @@ valuesFilePath: values.yml
 
 # Frogbot step
 {{ define "step.frogbot.onExecute" }}
-  {{ if eq $stepType "PowerShell" }}
+  {{ if eq . "PowerShell" }}
             - Write-Output "Executing Frogbot scan..."
   {{ else }}
             - echo "Executing Frogbot scan..."
@@ -210,7 +210,7 @@ pipelines:
             - name: {{ $frogbotScanResName }}
         execution:
           onExecute:
-            {{ template "step.frogbot.onExecute" . }}
+            {{ template "step.frogbot.onExecute" $stepType }}
 
       - name: code_quality
         type: {{ $stepType }}
