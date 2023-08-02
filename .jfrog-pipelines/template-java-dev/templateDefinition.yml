@@ -3,6 +3,8 @@ valuesFilePath: values.yml
 
 # Names
 {{ $packageName := .Values.metadata.packageName }}
+{{ $os := default "linux" .Values.metadata.os }}
+{{ $stepType := ternary "PowerShell" "Bash" (eq $os "windows") }}
 {{ $gitResName := print $packageName "_git_source" }}
 {{ $frogbotScanResName := print $packageName "_frogbot_scan_result" }}
 {{ $codeQualityResName := print $packageName "_code_quality_result" }}
@@ -169,7 +171,7 @@ pipelines:
           ENABLE_EXPORTING_REPORTS: '{{ $isExportingEnabled }}'
     steps:
       - name: frogbot_scan
-        type: Bash
+        type: {{ $stepType }}
         configuration:
           inputResources:
             - name: {{ $gitResName }}
@@ -200,7 +202,7 @@ pipelines:
             - echo 'Executing Frogbot scan...'
 
       - name: code_quality
-        type: Bash
+        type: {{ $stepType }}
         configuration:
           inputSteps:
             - name: frogbot_scan
@@ -221,7 +223,7 @@ pipelines:
             - popd
 
       - name: unit_tests
-        type: Bash
+        type: {{ $stepType }}
         configuration:
           inputSteps:
             - name: frogbot_scan
@@ -242,7 +244,7 @@ pipelines:
             - popd
 
       - name: lint
-        type: Bash
+        type: {{ $stepType }}
         configuration:
           affinityGroup: build
           inputSteps:
@@ -265,7 +267,7 @@ pipelines:
             - popd
 
       - name: build
-        type: Bash
+        type: {{ $stepType }}
         configuration:
           affinityGroup: build
           inputSteps:
@@ -287,7 +289,7 @@ pipelines:
             - popd
 
       - name: publish
-        type: Bash
+        type: {{ $stepType }}
         configuration:
           affinityGroup: build
           inputSteps:
