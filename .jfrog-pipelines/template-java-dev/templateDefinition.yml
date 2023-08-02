@@ -90,7 +90,7 @@ valuesFilePath: values.yml
 
 # code_quality step
 {{ define "step.codeQuality.onExecute" }}
-            - cd ${res_{{ $gitResName }}_resourcePath}{{ $rootDirectory }}
+            - cd ${res_{{ (get . "gitResName") }}_resourcePath}{{ (get . "rootDirectory") }}
             {{ if $isQualityCmdAvailable }}
             {{- range $cmd := .Values.configurations.steps.codeQuality.commands }}
             - {{ $cmd }}
@@ -235,7 +235,8 @@ pipelines:
             - name: {{ $codeQualityResName }}
         execution:
           onExecute:
-            {{ template "step.codeQuality.onExecute" . }}
+            {{ params := dict "gitResName" $gitResName "rootDirectory" $rootDirectory }}
+            {{ template "step.codeQuality.onExecute" $params }}
 
       - name: unit_tests
         type: {{ $stepType }}
