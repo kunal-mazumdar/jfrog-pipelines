@@ -349,3 +349,16 @@ pipelines:
         execution:
           onExecute:
             {{ template "step.publish.onExecute" $templateParams }}
+            - write_output {{ $buildInfoResName }} "buildName=$JFROG_CLI_BUILD_NAME"
+            - write_output {{ $buildInfoResName }} "buildNumber=$JFROG_CLI_BUILD_NUMBER"
+
+      - name: xray_scan
+        type: XrayScan
+        configuration:
+          failOnScan: false
+          inputSteps:
+            - name: publish
+              status:
+                - success
+          inputResources:
+            - name: {{ $buildInfoResName }}
