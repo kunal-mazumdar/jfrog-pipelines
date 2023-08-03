@@ -264,6 +264,8 @@ pipelines:
               trigger: {{ $isGitTriggerEnabled }}
           outputResources:
             - name: {{ $frogbotScanResName }}
+          inputSteps:
+            - name: trigger_all
         execution:
           onExecute:
             {{ template "step.frogbot.onExecute" $templateParams }}
