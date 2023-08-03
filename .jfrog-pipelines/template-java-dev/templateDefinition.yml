@@ -261,8 +261,8 @@ pipelines:
       - name: code_quality
         type: {{ $stepType }}
         configuration:
-          inputSteps:
-            - name: frogbot_scan
+#          inputSteps:
+#            - name: frogbot_scan
           inputResources:
             - name: {{ $gitResName }}
           outputResources:
@@ -274,8 +274,8 @@ pipelines:
       - name: unit_tests
         type: {{ $stepType }}
         configuration:
-          inputSteps:
-            - name: frogbot_scan
+#          inputSteps:
+#            - name: frogbot_scan
           inputResources:
             - name: {{ $gitResName }}
           outputResources:
@@ -288,8 +288,8 @@ pipelines:
         type: {{ $stepType }}
         configuration:
           affinityGroup: build
-          inputSteps:
-            - name: frogbot_scan
+#          inputSteps:
+#            - name: frogbot_scan
           inputResources:
             - name: {{ $gitResName }}
           outputResources:
@@ -317,17 +317,18 @@ pipelines:
         configuration:
           affinityGroup: build
           inputSteps:
+            - name: frogbot_scan
+              status:
+                - success
             - name: build
               status:
                 - success
             - name: unit_tests
               status:
                 - success
-                - skipped
             - name: code_quality
               status:
                 - success
-                - skipped
           outputResources:
             - name: {{ $buildInfoResultResName }}
             - name: {{ $buildInfoResName }}
