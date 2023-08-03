@@ -356,9 +356,5 @@ pipelines:
         type: XrayScan
         configuration:
           failOnScan: false
-          inputSteps:
-            - name: publish
-              status:
-                - success
           inputResources:
             - name: {{ $buildInfoResName }}
