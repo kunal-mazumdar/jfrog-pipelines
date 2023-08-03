@@ -37,8 +37,8 @@ inputs:
   # [Required]
   integrations:
     
-    # [Required] Artifactory access token to configure Jfrog CLI
-    artifactoryToken: jf_token
+    # [Required] Artifactory api key to configure Jfrog CLI
+    artifactory: art
 
 # [Required]
 configurations:
@@ -84,6 +84,8 @@ configurations:
       # commands:
       #  - 'gradle test'
 
+      reportFolder: ''
+
     build:
 
       # [Maven] Default to plugin: maven-compiler-plugin
@@ -103,6 +105,11 @@ configurations:
       # [Gradle]
       # commands:
       #  - 'gradle deploy'
+
+    xrayScan:
+
+      # [Optional] Defaults to false
+      failOnScan: false
 
 controls:
   

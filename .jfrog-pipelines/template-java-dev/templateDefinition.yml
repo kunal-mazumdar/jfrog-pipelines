@@ -39,7 +39,8 @@ valuesFilePath: values.yml
 # Reusable templates
 # These are resolved using 'template' thus indentation is important
 # -----------------------------------------------------------------
-{{ $templateParams := dict "values" .Values "gitResName" $gitResName "rootDirectory" $rootDirectory "buildTool" $buildTool "stepType" $stepType }}
+{{ $resultResources := dict "frogbotScanResName" $frogbotScanResName "codeQualityResName" $codeQualityResName "unitTestResName" $unitTestResName "buildInfoResultResName" $buildInfoResultResName }}
+{{ $templateParams := merge $resultResources (dict "values" .Values "gitResName" $gitResName "rootDirectory" $rootDirectory "buildTool" $buildTool "stepType" $stepType) }}
 
 # Git repo resource
 {{ define "res.gitRepo.config" }}
@@ -67,15 +68,23 @@ valuesFilePath: values.yml
             {{ else if (or (eq "maven" $.buildTool) (eq "gradle" $.buildTool)) }}
             - {{ $default }}
             {{ end }}
+
+            # Update current timestamp in result resource
+            {{ if eq $.stepType "linux" }}
+            - STEP_TIMESTAMP=$(date +%s)
+            {{ else }}
+            - $STEP_TIMESTAMP=[int](Get-Date -UFormat %s -Millisecond 0)
+            {{ end }}
+            - write-output {{ $.resultResource }} "timestamp=$STEP_TIMESTAMP"
 {{ end }}
 
 # frogbot step
 {{ define "step.frogbot.onExecute" }}
   {{ $stepType := get . "stepType" }}
-  {{ if eq $stepType "PowerShell" }}
-            - Write-Output "Executing Frogbot scan..."
-  {{ else }}
+  {{ if eq $stepType "linux" }}
             - echo "Executing Frogbot scan..."
+  {{ else }}
+            - Write-Output "Executing Frogbot scan..."
   {{ end }}
 {{ end }}
 
@@ -83,6 +92,7 @@ valuesFilePath: values.yml
 {{ define "step.codeQuality.onExecute" }}
   {{ $ := . }}
   {{ $ := set $ "conf" $.values.configurations.steps.codeQuality }}
+  {{ $ := set $ "resultResource" $.codeQualityResName }}
   {{ $ := set $ "defaultMvn" "mvn clean sonar:sonar" }}
   {{ $ := set $ "defaultGradle" "gradle clean sonar" }}
             - cd ${res_{{ $.gitResName }}_resourcePath}{{ $.rootDirectory }}
@@ -93,6 +103,7 @@ valuesFilePath: values.yml
 {{ define "step.test.onExecute" }}
   {{ $ := . }}
   {{ $ := set $ "conf" $.values.configurations.steps.test }}
+  {{ $ := set $ "resultResource" $.unitTestResName }}
   {{ $ := set $ "defaultMvn" "mvn clean test" }}
   {{ $ := set $ "defaultGradle" "gradle clean test" }}
             - cd ${res_{{ $.gitResName }}_resourcePath}{{ $.rootDirectory }}
@@ -103,22 +114,28 @@ valuesFilePath: values.yml
 {{ define "step.lint.onExecute" }}
   {{ $ := . }}
   {{ $ := set $ "conf" $.values.configurations.steps.lint }}
+  {{ $ := set $ "resultResource" $.buildInfoResultResName }}
   {{ $ := set $ "defaultMvn" "mvn clean checkstyle:checkstyle" }}
   {{ $ := set $ "defaultGradle" "gradle clean lint" }}
+  {{ $stepType := get . "stepType" }}
             - cd ${res_{{ $.gitResName }}_resourcePath}{{ $.rootDirectory }}
             {{ template "step.shared.onExecute.command" $ }}
-            # TODO: Fix windows command
-            - cp -r * ${shared_workspace}
+
+            {{ if eq $.stepType "linux" }}
+            - cp -r * $shared_workspace
+            {{ else }}
+            - Copy-Item -Force -Recurse * -Destination $shared_workspace
+            {{ end }}
 {{ end }}
 
 # build step
 {{ define "step.build.onExecute" }}
   {{ $ := . }}
   {{ $ := set $ "conf" $.values.configurations.steps.build }}
+  {{ $ := set $ "resultResource" $.buildInfoResultResName }}
   {{ $ := set $ "defaultMvn" "mvn -Dmaven.test.skip=true install" }}
   {{ $ := set $ "defaultGradle" "gradle clean build -x test" }}
-            # TODO: Fix windows command
-            - cd ${shared_workspace}{{ $.rootDirectory }}
+            - cd $shared_workspace{{ $.rootDirectory }}
             {{ template "step.shared.onExecute.command" $ }}
 {{ end }}
 
@@ -126,10 +143,10 @@ valuesFilePath: values.yml
 {{ define "step.publish.onExecute" }}
   {{ $ := . }}
   {{ $ := set $ "conf" $.values.configurations.steps.publish }}
+  {{ $ := set $ "resultResource" $.buildInfoResultResName }}
   {{ $ := set $ "defaultMvn" "mvn deploy" }}
   {{ $ := set $ "defaultGradle" "gradle deploy" }}
-            # TODO: Fix windows command
-            - cd ${shared_workspace}{{ $.rootDirectory }}
+            - cd $shared_workspace{{ $.rootDirectory }}
             {{ template "step.shared.onExecute.command" $ }}
 {{ end }}
 # -----------------------------------------------------------------
@@ -145,34 +162,28 @@ resources:
     type: PropertyBag
     configuration:
       timestamp: ''
-      reportUrl: ''
 
   - name: {{ $codeQualityResName }}
     type: PropertyBag
     configuration:
       timestamp: ''
-      reportUrl: ''
 
   - name: {{ $unitTestResName }}
     type: PropertyBag
     configuration:
       timestamp: ''
-      status: ''
 
   - name: {{ $buildInfoResultResName }}
     type: PropertyBag
     configuration:
       timestamp: ''
-      lintStatus: ''
-      buildStatus: ''
-      publishStatus: ''
 
   - name: {{ $buildInfoResName }}
     type: BuildInfo
     configuration:
-      sourceArtifactory: myArt
-      buildName: java_test_app
-      buildNumber: ${run_id}
+      sourceArtifactory: {{ .Values.inputs.integrations.artifactory }}
+      buildName: ''
+      buildNumber: ''
 
   {{ if $isCronTriggerEnabled }}
   - name: {{ $cronResName }}
@@ -209,7 +220,7 @@ pipelines:
               - "17"
           {{ end }}
       integrations:
-        - name: {{ .Values.inputs.integrations.artifactoryToken }}
+        - name: {{ .Values.inputs.integrations.artifactory }}
         {{ if $isEmailNotificationsAvailable}}
         - name: {{ .Values.controls.notifications.email.integrationName }}
         {{ end }}
@@ -355,6 +366,6 @@ pipelines:
       - name: xray_scan
         type: XrayScan
         configuration:
-          failOnScan: false
+          failOnScan: {{ default false .Values.configurations.steps.xrayScan.failOnScan }}
           inputResources:
             - name: {{ $buildInfoResName }}
