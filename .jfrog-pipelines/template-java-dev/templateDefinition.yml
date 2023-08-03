@@ -252,6 +252,9 @@ pipelines:
             - name: "{{ $packageName }}_webhook_{{ $webhook.webhookName }}"
             {{ end }}
             {{ end }}
+        execution:
+          onExecute:
+            - end_step success
 
       - name: frogbot_scan
         type: {{ $stepType }}
