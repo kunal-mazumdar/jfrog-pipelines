@@ -227,7 +227,7 @@ pipelines:
           ENABLE_DEBUG_LOGS: '{{ $isDebugLogsEnabled }}'
           ENABLE_EXPORTING_REPORTS: '{{ $isExportingEnabled }}'
     steps:
-      - name: frogbot_scan
+      - name: trigger_all
         type: {{ $stepType }}
         configuration:
           inputResources:
@@ -252,6 +252,13 @@ pipelines:
             - name: "{{ $packageName }}_webhook_{{ $webhook.webhookName }}"
             {{ end }}
             {{ end }}
+
+      - name: frogbot_scan
+        type: {{ $stepType }}
+        configuration:
+          inputResources:
+            - name: {{ $gitResName }}
+              trigger: {{ $isGitTriggerEnabled }}
           outputResources:
             - name: {{ $frogbotScanResName }}
         execution:
@@ -261,10 +268,11 @@ pipelines:
       - name: code_quality
         type: {{ $stepType }}
         configuration:
-#          inputSteps:
-#            - name: frogbot_scan
+          inputSteps:
+            - name: trigger_all
           inputResources:
             - name: {{ $gitResName }}
+              trigger: {{ $isGitTriggerEnabled }}
           outputResources:
             - name: {{ $codeQualityResName }}
         execution:
@@ -274,10 +282,11 @@ pipelines:
       - name: unit_tests
         type: {{ $stepType }}
         configuration:
-#          inputSteps:
-#            - name: frogbot_scan
+          inputSteps:
+            - name: trigger_all
           inputResources:
             - name: {{ $gitResName }}
+              trigger: {{ $isGitTriggerEnabled }}
           outputResources:
             - name: {{ $unitTestResName }}
         execution:
@@ -288,10 +297,11 @@ pipelines:
         type: {{ $stepType }}
         configuration:
           affinityGroup: build
-#          inputSteps:
-#            - name: frogbot_scan
+          inputSteps:
+            - name: trigger_all
           inputResources:
             - name: {{ $gitResName }}
+              trigger: {{ $isGitTriggerEnabled }}
           outputResources:
             - name: {{ $buildInfoResultResName }}
         execution:
