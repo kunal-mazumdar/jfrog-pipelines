@@ -229,11 +229,9 @@ pipelines:
     steps:
       - name: trigger_all
         type: {{ $stepType }}
+        {{ if (or $isExternalTriggerAvailable $isCronTriggerEnabled $isWebhookTriggerEnabled) }}
         configuration:
           inputResources:
-            - name: {{ $gitResName }}
-              trigger: {{ $isGitTriggerEnabled }}
-
             # Enable trigger options via external resources
             {{ if $isExternalTriggerAvailable }}
             {{- range $resource := .Values.controls.triggerBy.externalResources }}
@@ -252,6 +250,7 @@ pipelines:
             - name: "{{ $packageName }}_webhook_{{ $webhook.webhookName }}"
             {{ end }}
             {{ end }}
+        {{ end }}
         execution:
           onExecute:
             - end_step success
