@@ -7,7 +7,7 @@ metadata:
   # [Optional]
   java: "17"
 
-  # [Optional]
+  # [Optional] linux/windows
   os: "windows"
 
   # [Optional] Defaults to Ubuntu18 with Java 17
@@ -43,11 +43,11 @@ inputs:
 # [Required]
 configurations:
 
-  # [Optional] Defaults to Maven
+  # [Optional] Defaults to Maven (maven/gradle/other)
   buildTool: 'maven'
 
   # [Optional] Defaults to repository root folder
-  sourceDirectory: ''
+  sourceFolder: ''
 
   # [Optional] Enable notifications
   notifications:

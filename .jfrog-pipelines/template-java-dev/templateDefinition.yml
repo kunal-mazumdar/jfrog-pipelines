@@ -13,7 +13,7 @@ valuesFilePath: values.yml
 {{ $buildInfoResName := print $packageName "_build_info" }}
 {{ $cronResName := print $packageName "_cron" }}
 {{ $pipelineName := print $packageName "_build" }}
-{{ $rootDirectory := ternary (print "/" .Values.configurations.sourceDirectory) "" (not (eq "" .Values.configurations.sourceDirectory)) }}
+{{ $rootDirectory := ternary (print "/" .Values.configurations.sourceFolder) "" (not (eq "" .Values.configurations.sourceFolder)) }}
 
 # Build Trigger
 {{ $buildTool := default "maven" .Values.configurations.buildTool }}
@@ -273,7 +273,7 @@ pipelines:
           onExecute:
             - end_step success
 
-      {{ if $isFrogotScanEnabled }}
+      {{ if $isFrogbotScanEnabled }}
       - name: frogbot_scan
         type: {{ $stepType }}
         configuration:
@@ -364,7 +364,7 @@ pipelines:
         configuration:
           affinityGroup: build
           inputSteps:
-            {{ if $isFrogotScanEnabled }}
+            {{ if $isFrogbotScanEnabled }}
             - name: frogbot_scan
               status:
                 - success
