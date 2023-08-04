@@ -322,7 +322,7 @@ pipelines:
             {{ template "step.test.onExecute" $templateParams }}
       {{ end }}
 
-      {{ if $islintEnabled }}
+      {{ if $isLintEnabled }}
       - name: lint
         type: {{ $stepType }}
         configuration:
