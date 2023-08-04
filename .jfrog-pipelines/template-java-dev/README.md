@@ -1,10 +1,27 @@
-# Java Template
+# JFrog Pipelines Template - Java CI
 
-## PENDING WORK IN TEMPLATE
-- Call notification tasks fn after task integration
-- Export report files when enabled (or remove)
-- Fix documentation
-- Fix values file
+This template simplifies CI pipeline for any Java package. Also allows to connect various package pipelines to make a larger CI pipeline for Java.
+
+----
 
 ## Features
-- Yet to add
+TODO
+
+----
+
+## Pre-requisites
+TODO
+
+----
+
+## Usage
+TODO
+
+----
+
+## Pipelines Details
+### Pipeline
+TODO
+
+### Resources
+TODO

@@ -1,19 +1,11 @@
-# JFrog Pipelines Template - Artifactory Artifacts Cleanup :)
+# JFrog Pipelines Template - Java CI
 
-This template deletes all artifacts that have not been downloaded for the past *n time units* or have been created prior to *n time units* which is by default 1 month. It can be run manually by triggering a Pipeline, or automatically as a scheduled job.
+This template simplifies CI pipeline for any Java package
 
 ----
 
 ## Features
 
-### Artifacts Cleanup
-- Include artifacts downloaded before the selected time window (default)
-- Include artifacts created before the selected time window (optional)
-- Exclude artifacts if property `cleanup.skip` is defined on artifact.
-
-### Docker Artifacts Cleanup
-- Include artifacts downloaded before the selected time window (default)
-- Include artifacts created before the selected time window (optional)
 
 ----
 

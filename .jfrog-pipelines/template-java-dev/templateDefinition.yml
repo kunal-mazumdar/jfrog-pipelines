@@ -24,6 +24,14 @@ valuesFilePath: values.yml
 {{ $isCronTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.cron (eq .Values.controls.triggerBy.cron.enabled true)) }}
 {{ $isWebhookTriggerEnabled := default false (and $isTriggerByAvailable .Values.controls.triggerBy.incomingWebhooks) }}
 
+#Steps settings
+{{ $isFrogbotScanEnabled := default true .Values.configuration.frogbotScan.enabled }}
+{{ $isLintEnabled := default true .Values.configuration.lint.enabled }}
+{{ $isTestEnabled := default true .Values.configuration.test.enabled }}
+{{ $isBuildEnabled := default true .Values.configuration.build.enabled }}
+{{ $isPublishEnabled := default true .Values.configuration.publish.enabled }}
+{{ $isXrayScanEnabled := default true .Values.configuration.xrayScan.enabled }}
+
 # Logging
 {{ $isDebugLogsEnabled := and $isControlsAvailable .Values.controls.logging (eq true .Values.controls.logging.enableDebug) }}
 
@@ -108,6 +116,7 @@ valuesFilePath: values.yml
   {{ $ := set $ "defaultGradle" "gradle clean test" }}
             - cd ${res_{{ $.gitResName }}_resourcePath}{{ $.rootDirectory }}
             {{ template "step.shared.onExecute.command" $ }}
+            - save_tests {{ $.values.configurations.steps.test.reportFolder }}
 {{ end }}
 
 # lint step
@@ -148,6 +157,8 @@ valuesFilePath: values.yml
   {{ $ := set $ "defaultGradle" "gradle deploy" }}
             - cd $shared_workspace{{ $.rootDirectory }}
             {{ template "step.shared.onExecute.command" $ }}
+            - write_output {{ $.resultResource }} "buildName=$JFROG_CLI_BUILD_NAME"
+            - write_output {{ $.resultResource }} "buildNumber=$JFROG_CLI_BUILD_NUMBER"
 {{ end }}
 # -----------------------------------------------------------------
 
@@ -233,10 +244,6 @@ pipelines:
       nodePool: {{ .Values.metadata.nodePool }}
       {{ end }}
 
-      environmentVariables:
-        readOnly:
-          ENABLE_DEBUG_LOGS: '{{ $isDebugLogsEnabled }}'
-          ENABLE_EXPORTING_REPORTS: '{{ $isExportingEnabled }}'
     steps:
       - name: trigger_all
         type: {{ $stepType }}
@@ -266,6 +273,7 @@ pipelines:
           onExecute:
             - end_step success
 
+      {{ if $isFrogotScanEnabled }}
       - name: frogbot_scan
         type: {{ $stepType }}
         configuration:
@@ -279,7 +287,9 @@ pipelines:
         execution:
           onExecute:
             {{ template "step.frogbot.onExecute" $templateParams }}
+      {{ end }}
 
+      {{ if $isQualityEnabled }}
       - name: code_quality
         type: {{ $stepType }}
         configuration:
@@ -293,7 +303,9 @@ pipelines:
         execution:
           onExecute:
             {{ template "step.codeQuality.onExecute" $templateParams }}
+      {{ end }}
 
+      {{ if $isTestEnabled }}
       - name: unit_tests
         type: {{ $stepType }}
         configuration:
@@ -307,7 +319,9 @@ pipelines:
         execution:
           onExecute:
             {{ template "step.test.onExecute" $templateParams }}
+      {{ end }}
 
+      {{ if $islintEnabled }}
       - name: lint
         type: {{ $stepType }}
         configuration:
@@ -322,50 +336,67 @@ pipelines:
         execution:
           onExecute:
             {{ template "step.lint.onExecute" $templateParams }}
+      {{ end }}
 
+      {{ if $isBuildEnabled }}
       - name: build
         type: {{ $stepType }}
         configuration:
           affinityGroup: build
           inputSteps:
+            {{ if $isLintEnabled }}
             - name: lint
               status:
                 - success
+            {{ else }}
+            - name: trigger_all
+            {{ end }}
           outputResources:
             - name: {{ $buildInfoResultResName }}
         execution:
           onExecute:
             {{ template "step.build.onExecute" $templateParams }}
+      {{ end }}
 
+      {{ if $isPublishEnabled }}
       - name: publish
         type: {{ $stepType }}
         configuration:
           affinityGroup: build
           inputSteps:
+            {{ if $isFrogotScanEnabled }}
             - name: frogbot_scan
               status:
                 - success
+            {{ end }}
+            {{ if $isBuildEnabled }}
             - name: build
               status:
                 - success
+            {{ end }}
+            {{ if $isTestEnabled }}
             - name: unit_tests
               status:
                 - success
+            {{ end }}
+            {{ if $isQualityEnabled }}
             - name: code_quality
               status:
                 - success
+            {{ end }}
           outputResources:
             - name: {{ $buildInfoResultResName }}
             - name: {{ $buildInfoResName }}
         execution:
           onExecute:
             {{ template "step.publish.onExecute" $templateParams }}
-            - write_output {{ $buildInfoResName }} "buildName=$JFROG_CLI_BUILD_NAME"
-            - write_output {{ $buildInfoResName }} "buildNumber=$JFROG_CLI_BUILD_NUMBER"
+      {{ end }}
 
+      {{ if $isXrayScanEnabled }}
       - name: xray_scan
         type: XrayScan
         configuration:
           failOnScan: {{ default false .Values.configurations.steps.xrayScan.failOnScan }}
           inputResources:
             - name: {{ $buildInfoResName }}
+      {{ end }}

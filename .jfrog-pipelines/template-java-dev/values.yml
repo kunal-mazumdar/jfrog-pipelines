@@ -49,64 +49,96 @@ configurations:
   # [Optional] Defaults to repository root folder
   sourceDirectory: ''
 
+  # [Optional] Enable notifications
+  notifications:
+    email:
+      integrationName: 'mySMTP' # SMTP
+      recipients:
+        - 'email@company.com'
+
+    slack:
+      integrationName: 'mySlack'
+      recipients:
+        - '#channel'
+        - '@user'
+
   # [Optional] When buildTool = Maven/Gradle
   # [Required] When buildTool = Other
   steps:
 
     lint:
 
-      # [Maven] Default to plugin: maven-checkstyle-plugin
+      # [Optional] Allows skipping step. Defaults to true
+      # enabled: true
+
       commands:
+        # [Maven] Default to plugin: maven-checkstyle-plugin
         - 'mvn clean checkstyle:checkstyle'
 
-      # [Gradle]
-      # commands:
-      #  - 'gradle lint'
+        # [Gradle]
+        # - 'gradle lint'
 
     codeQuality:
 
-      # [Maven] Default to plugin: maven-checkstyle-plugin
+      # [Optional] Allows skipping step. Defaults to true
+      # enabled: true
+
       commands:
+        # [Maven] Default to plugin: maven-checkstyle-plugin
         - 'mvn clean sonar:sonar'
 
-      # [Gradle]
-      # commands:
-      #  - 'gradle sonar'
+        # [Gradle]
+        #   - 'gradle sonar'
 
     test:
 
-      # [Maven] Default to plugin: maven-surefire-plugin
+      # [Optional] Allows skipping step. Defaults to true
+      # enabled: true
+
       commands:
+        # [Maven] Default to plugin: maven-surefire-plugin
         - 'mvn clean'
         - 'mvn test'
 
-      # [Gradle]
-      # commands:
-      #  - 'gradle test'
+        # [Gradle]
+        #  - 'gradle test'
 
+      # [Required] JUnit test report folder path
       reportFolder: ''
 
     build:
 
-      # [Maven] Default to plugin: maven-compiler-plugin
+      # [Optional] Allows skipping step. Defaults to true
+      # enabled: true
+
       commands:
+        # [Maven] Default to plugin: maven-compiler-plugin
         - 'mvn -Dmaven.test.skip=true install'
 
-      # [Gradle]
-      # commands:
-      #  - 'gradle clean build -x test'
+        # [Gradle]
+        #  - 'gradle clean build -x test'
 
     publish:
 
-      # [Maven] Default to plugin: maven-deploy-plugin
+      # [Optional] Allows skipping step. Defaults to true
+      # enabled: true
+
       commands:
+        # [Maven] Default to plugin: maven-deploy-plugin
         - 'mvn deploy'
 
-      # [Gradle]
-      # commands:
-      #  - 'gradle deploy'
+        # [Gradle]
+        #  - 'gradle deploy'
+
+    frogbotScan:
+
+      # [Optional] Allows skipping step. Defaults to true
+      # enabled: true
 
     xrayScan:
+
+      # [Optional] Allows skipping step. Defaults to true
+      # enabled: true
 
       # [Optional] Defaults to false
       failOnScan: false
@@ -145,11 +177,3 @@ controls:
 
     # [Optional] Defaults to false
     enabled: true
-
-  # [Optional] Enable notifications
-  notifications:
-    email:
-      integrationName: 'mySMTP' # SMTP
-
-    slack:
-      integrationName: 'mySlack'
