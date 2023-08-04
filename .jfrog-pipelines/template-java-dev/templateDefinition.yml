@@ -27,6 +27,7 @@ valuesFilePath: values.yml
 #Steps settings
 {{ $isFrogbotScanEnabled := default true .Values.configuration.frogbotScan.enabled }}
 {{ $isLintEnabled := default true .Values.configuration.lint.enabled }}
+{{ $isQualityEnabled := default true .Values.configuration.codeQuality.enabled }}
 {{ $isTestEnabled := default true .Values.configuration.test.enabled }}
 {{ $isBuildEnabled := default true .Values.configuration.build.enabled }}
 {{ $isPublishEnabled := default true .Values.configuration.publish.enabled }}
