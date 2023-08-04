@@ -67,6 +67,16 @@ valuesFilePath: values.yml
 {{ end }}
 
 # Steps shared template
+{{ define "step.shared.utility.timestamp" }}
+            # Update current timestamp in result resource
+            {{ if eq $.stepType "linux" }}
+            - STEP_TIMESTAMP=$(date +%s)
+            {{ else }}
+            - $STEP_TIMESTAMP=[int](Get-Date -UFormat %s -Millisecond 0)
+            {{ end }}
+            - write-output {{ $.resultResource }} "timestamp=$STEP_TIMESTAMP"
+{{ end }}
+
 {{ define "step.shared.onExecute.command" }}
   {{ $ := . }}
   {{ $default := ternary $.defaultGradle $.defaultMvn (eq $.buildTool "gradle") }}
@@ -77,14 +87,7 @@ valuesFilePath: values.yml
             {{ else if (or (eq "maven" $.buildTool) (eq "gradle" $.buildTool)) }}
             - {{ $default }}
             {{ end }}
-
-            # Update current timestamp in result resource
-            {{ if eq $.stepType "linux" }}
-            - STEP_TIMESTAMP=$(date +%s)
-            {{ else }}
-            - $STEP_TIMESTAMP=[int](Get-Date -UFormat %s -Millisecond 0)
-            {{ end }}
-            - write-output {{ $.resultResource }} "timestamp=$STEP_TIMESTAMP"
+            {{ template "step.shared.utility.timestamp" . }}
 {{ end }}
 
 # frogbot step
