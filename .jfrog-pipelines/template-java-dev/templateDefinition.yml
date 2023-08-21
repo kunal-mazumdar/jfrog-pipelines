@@ -69,7 +69,7 @@ valuesFilePath: values.yml
 # Steps shared template
 {{ define "step.shared.utility.timestamp" }}
             # Update current timestamp in result resource
-            {{ if eq $.stepType "linux" }}
+            {{ if eq $.stepType "Bash" }}
             - STEP_TIMESTAMP=$(date +%s)
             {{ else }}
             - $STEP_TIMESTAMP=[int](Get-Date -UFormat %s -Millisecond 0)
@@ -93,7 +93,7 @@ valuesFilePath: values.yml
 # frogbot step
 {{ define "step.frogbot.onExecute" }}
   {{ $stepType := get . "stepType" }}
-  {{ if eq $stepType "linux" }}
+  {{ if eq $stepType "Bash" }}
             - echo "Executing Frogbot scan..."
   {{ else }}
             - Write-Output "Executing Frogbot scan..."
@@ -134,7 +134,7 @@ valuesFilePath: values.yml
             - cd ${res_{{ $.gitResName }}_resourcePath}{{ $.rootDirectory }}
             {{ template "step.shared.onExecute.command" $ }}
 
-            {{ if eq $.stepType "linux" }}
+            {{ if eq $.stepType "Bash" }}
             - cp -r * $shared_workspace
             {{ else }}
             - Copy-Item -Force -Recurse * -Destination $shared_workspace
