@@ -74,7 +74,7 @@ valuesFilePath: values.yml
             {{ else }}
             - $STEP_TIMESTAMP=[int](Get-Date -UFormat %s -Millisecond 0)
             {{ end }}
-            - write-output {{ $.resultResource }} "timestamp=$STEP_TIMESTAMP"
+            - write_output {{ $.resultResource }} "timestamp=$STEP_TIMESTAMP"
 {{ end }}
 
 {{ define "step.shared.onExecute.command" }}
