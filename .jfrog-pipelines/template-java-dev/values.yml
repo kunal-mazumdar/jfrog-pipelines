@@ -2,13 +2,13 @@
 metadata:
   
   # [Required] All the underlying pipelines & resources names will be prefixed with appName for easy identifications & search
-  packageName:  test
+  packageName:  javaTemplate
 
   # [Optional]
-  java: "17"
+  java: "11"
 
   # [Optional] linux/windows
-  os: "windows"
+  os: "linux"
 
   # [Optional] Defaults to Ubuntu18 with Java 17
   # Allows to configure custom runtime, support all the configuration properties under runtime.image.custom
@@ -29,16 +29,16 @@ inputs:
   sourceRepository:
     # Support all the Git Resource configuration properties
     # Ref: https://jfrog.com/help/r/jfrog-pipelines-documentation/gitrepo
-    path: kunal-mazumdar/simple-java-maven-app
-    gitProvider: kunal_gh
+    path: nitind123/newTemplates
+    gitProvider: s_gitHub
     branches:
-      include: master
+      include: JavaTemplate
 
   # [Required]
   integrations:
     
     # [Required] Artifactory api key to configure Jfrog CLI
-    artifactory: art
+    artifactory: entArt
 
 # [Required]
 configurations:
@@ -47,20 +47,18 @@ configurations:
   buildTool: 'maven'
 
   # [Optional] Defaults to repository root folder
-  sourceFolder: ''
+  sourceFolder: 'yaml/javaTem'
 
-  # [Optional] Enable notifications
-  notifications:
-    email:
-      integrationName: 'mySMTP' # SMTP
-      recipients:
-        - 'email@company.com'
+  # Artifactory repos to resolve & deploy artifacts
+  artifactory:
 
-    slack:
-      integrationName: 'mySlack'
-      recipients:
-        - '#channel'
-        - '@user'
+    resolverSnapshotRepo: km-mvn-release-virtual
+
+    resolverReleaseRepo: km-mvn-release-virtual
+
+    deployerSnapshotRepo: km-mvn-release-local
+
+    deployerReleaseRepo: km-mvn-release-local
 
   # [Optional] When buildTool = Maven/Gradle
   # [Required] When buildTool = Other
@@ -85,7 +83,8 @@ configurations:
 
       commands:
         # [Maven] Default to plugin: maven-checkstyle-plugin
-        - 'mvn clean sonar:sonar'
+       # - 'mvn clean sonar:sonar'
+        - 'mvn clean install'
 
         # [Gradle]
         #   - 'gradle sonar'
@@ -99,12 +98,13 @@ configurations:
         # [Maven] Default to plugin: maven-surefire-plugin
         - 'mvn clean'
         - 'mvn test'
+        - ls .
 
         # [Gradle]
         #  - 'gradle test'
 
       # [Required] JUnit test report folder path
-      reportFolder: ''
+      reportFolder: 'test-result.0a359bdae2f41724cceeef2faa538ef8.xml'
 
     build:
 
@@ -125,23 +125,10 @@ configurations:
 
       commands:
         # [Maven] Default to plugin: maven-deploy-plugin
-        - 'mvn deploy'
+        - 'mvn clean package'
 
         # [Gradle]
         #  - 'gradle deploy'
-
-    frogbotScan:
-
-      # [Optional] Allows skipping step. Defaults to true
-      # enabled: true
-
-    xrayScan:
-
-      # [Optional] Allows skipping step. Defaults to true
-      # enabled: true
-
-      # [Optional] Defaults to false
-      failOnScan: false
 
 controls:
   
