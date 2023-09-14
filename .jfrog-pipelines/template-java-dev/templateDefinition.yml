@@ -71,7 +71,6 @@ valuesFilePath: values.yml
 
 # Steps shared template
 {{- define "step.shared.utility.timestamp" }}
-            # Update current timestamp in result resource
             {{- if eq $.stepType "Bash" }}
             - STEP_TIMESTAMP=$(date +%s)
             {{- else }}
@@ -246,10 +245,8 @@ valuesFilePath: values.yml
             - cd $shared_workspace{{ $.rootDirectory }}
             {{ template "step.shared.default.onExecute" $ }}
             - jf rt bp ${JFROG_CLI_BUILD_NAME} ${JFROG_CLI_BUILD_NUMBER}
-            # Updating result PropertyBag resource
             - write_output {{ $.resultResource }} "buildName=${JFROG_CLI_BUILD_NAME}"
             - write_output {{ $.resultResource }} "buildNumber=${JFROG_CLI_BUILD_NUMBER}"
-            # Updating BuildInfo resource
             - write_output {{ $.buildInfoResource }} "buildName=${JFROG_CLI_BUILD_NAME}"
             - write_output {{ $.buildInfoResource }} "buildNumber=${JFROG_CLI_BUILD_NUMBER}"
         {{- end }}
