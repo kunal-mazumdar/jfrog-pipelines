@@ -118,33 +118,33 @@ valuesFilePath: values.yml
 {{ define "step.shared.onHooks" }}
         {{ if $.conf.onStart }}
           onStart:
-            {{ - range $cmd := $.conf.onStart }}
+            {{- range $cmd := $.conf.onStart }}
             - {{ $cmd }}
-            {{ - end }}
+            {{- end }}
         {{ end }}
         {{ if $.conf.onExecute }}
           onExecute:
-            {{ - range $cmd := $.conf.onExecute }}
+            {{- range $cmd := $.conf.onExecute }}
             - {{ $cmd }}
-            {{ - end }}
+            {{- end }}
         {{ end }}
         {{ if $.conf.onSuccess }}
           onSuccess:
-            {{ - range $cmd := $.conf.onSuccess }}
+            {{- range $cmd := $.conf.onSuccess }}
             - {{ $cmd }}
-            {{ - end }}
+            {{- end }}
         {{ end }}
         {{ if $.conf.onFailure }}
           onFailure:
-            {{ - range $cmd := $.conf.onFailure }}
+            {{- range $cmd := $.conf.onFailure }}
             - {{ $cmd }}
-            {{ - end }}
+            {{- end }}
         {{ end }}
         {{ if $.conf.onComplete }}
           onComplete:
-            {{ - range $cmd := $.conf.onComplete }}
+            {{- range $cmd := $.conf.onComplete }}
             - {{ $cmd }}
-            {{ - end }}
+            {{- end }}
         {{ end }}
 {{ end }}
 
