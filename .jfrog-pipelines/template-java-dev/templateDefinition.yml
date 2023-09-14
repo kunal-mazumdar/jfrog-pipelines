@@ -83,13 +83,13 @@ valuesFilePath: values.yml
 {{ define "step.shared.default.onExecute" }}
   {{ $ := . }}
   {{ $default := ternary $.defaultGradle $.defaultMvn (eq $.buildTool "gradle") }}
-            {{ if $.conf }}
+          {{ if $.conf }}
             {{- range $cmd := $.conf.commands }}
             - {{ $cmd }}
             {{- end }}
-            {{ else if (or (eq "maven" $.buildTool) (eq "gradle" $.buildTool)) }}
+          {{ else if (or (eq "maven" $.buildTool) (eq "gradle" $.buildTool)) }}
             - {{ $default }}
-            {{ end }}
+          {{ end }}
             {{ template "step.shared.utility.timestamp" . }}
 {{ end }}
 
@@ -155,12 +155,13 @@ valuesFilePath: values.yml
   {{ $ := set $ "resultResource" $.codeQualityResName }}
   {{ $ := set $ "defaultMvn" "mvn clean sonar:sonar" }}
   {{ $ := set $ "defaultGradle" "gradle clean sonar" }}
-        {{ if $.conf.commands }}
+  {{ $ := set $ "isHooksAvailable" (and $.conf (or $.conf.onStart $.conf.onExecute $.conf.onSuccess $.conf.onFailure $.conf.onComplete)) }}
+        {{ if $.isHooksAvailable }}
+          {{ template "step.shared.onHooks" $ }}
+        {{ else }}
           onExecute:
             - cd ${res_{{ $.gitResName }}_resourcePath}{{ $.rootDirectory }}
             {{ template "step.shared.default.onExecute" $ }}
-        {{ else }}
-          {{ template "step.shared.onHooks" $ }}
         {{ end }}
 {{ end }}
 
