@@ -225,7 +225,7 @@ valuesFilePath: values.yml
   {{ $ := set $ "defaultMvn" "mvn deploy" }}
   {{ $ := set $ "defaultGradle" "gradle deploy" }}
             # Configure JFrog CLI with Artifactory Maven repos
-            {{ if eq $buildTool "maven" }}
+            {{ if eq $.buildTool "maven" }}
             jf mvnc --server-id-resolve {{ .Values.inputs.integrations.artifactory }} --repo-resolve-snapshots {{ .Values.configurations.artifactory.resolverSnapshotRepo }} --repo-resolve-releases {{ .Values.configurations.artifactory.resolverReleaseRepo }} \
               --server-id-deploy {{ .Values.inputs.integrations.artifactory }} --repo-deploy-snapshots {{ .Values.configurations.artifactory.deployerSnapshotRepo }} --repo-deploy-releases {{ .Values.configurations.artifactory.deployerReleaseRepo }}
             {{ end }}
