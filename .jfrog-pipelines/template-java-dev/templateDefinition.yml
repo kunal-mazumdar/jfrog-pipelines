@@ -159,7 +159,7 @@ valuesFilePath: values.yml
           onExecute:
             - cd ${res_{{ $.gitResName }}_resourcePath}{{ $.rootDirectory }}
             {{ template "step.shared.default.onExecute" $ }}
-        {{ elif }}
+        {{ else }}
           {{ template "step.shared.onHooks" $ }}
         {{ end }}
 {{ end }}
@@ -176,7 +176,7 @@ valuesFilePath: values.yml
             - cd ${res_{{ $.gitResName }}_resourcePath}{{ $.rootDirectory }}
             {{ template "step.shared.default.onExecute" $ }}
             - save_tests {{ $.values.configurations.steps.test.reportFolder }}
-        {{ elif }}
+        {{ else }}
           {{ template "step.shared.onHooks" $ }}
         {{ end }}
 {{ end }}
@@ -200,7 +200,7 @@ valuesFilePath: values.yml
             {{ else }}
             - Copy-Item -Force -Recurse * -Destination $shared_workspace
             {{ end }}
-        {{ elif }}
+        {{ else }}
           {{ template "step.shared.onHooks" $ }}
         {{ end }}
 {{ end }}
