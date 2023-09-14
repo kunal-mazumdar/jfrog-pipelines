@@ -38,16 +38,16 @@ inputs:
   sourceRepository:
     # Support all the Git Resource configuration properties
     # Ref: https://jfrog.com/help/r/jfrog-pipelines-documentation/gitrepo
-    path: nitind123/newTemplates
-    gitProvider: s_gitHub
+    path: kunal-mazumdar/jfrog-pipelines
+    gitProvider: kunal_gh
     branches:
-      include: JavaTemplate
+      include: main
 
   # [Required]
   integrations:
     
     # [Required] Artifactory api key to configure Jfrog CLI
-    artifactory: entArt
+    artifactory: int_default_artifactory
 
 # [Required]
 configurations:
