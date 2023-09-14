@@ -71,13 +71,13 @@ valuesFilePath: values.yml
 
 # Steps shared template
 {{ define "step.shared.utility.timestamp" }}
-            # Update current timestamp in result resource
-            {{ if eq $.stepType "Bash" }}
-            - STEP_TIMESTAMP=$(date +%s)
-            {{ else }}
-            - $STEP_TIMESTAMP=[int](Get-Date -UFormat %s -Millisecond 0)
-            {{ end }}
-            - write_output {{ $.resultResource }} "timestamp=$STEP_TIMESTAMP"
+              # Update current timestamp in result resource
+              {{ if eq $.stepType "Bash" }}
+              - STEP_TIMESTAMP=$(date +%s)
+              {{ else }}
+              - $STEP_TIMESTAMP=[int](Get-Date -UFormat %s -Millisecond 0)
+              {{ end }}
+              - write_output {{ $.resultResource }} "timestamp=$STEP_TIMESTAMP"
 {{ end }}
 
 {{ define "step.shared.default.onExecute" }}
