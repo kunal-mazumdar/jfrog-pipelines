@@ -10,6 +10,9 @@ metadata:
   # [Optional] linux/windows
   os: "linux"
 
+  # [Optional] 1/2 (defaults to 2)
+  jfrogCliVersion: 2
+
   # [Optional] Defaults to Ubuntu18 with Java 17
   # Allows to configure custom runtime, support all the configuration properties under runtime.image.custom
   # Ref: https://jfrog.com/help/r/jfrog-pipelines-documentation/choosing-your-runtime-image
@@ -21,6 +24,12 @@ metadata:
 
   # [Optional] If not provided then default nodePool configured in platform will be used
   #  nodePool: some_nodepool
+
+  # [Optional] Setup retention (no defaults)
+  # Ref: https://jfrog.com/help/r/jfrog-pipelines-documentation/setting-retention-policy
+  # retentionPolicy:
+    # maxAgeDays: 30
+    # minRuns: 5
 
 # [Required]
 inputs:
@@ -68,6 +77,14 @@ configurations:
 
       # [Optional] Allows skipping step. Defaults to true
       # enabled: true
+
+      # Allows to configure custom runtime, support all the configuration properties under runtime.image.custom
+      # Ref: https://jfrog.com/help/r/jfrog-pipelines-documentation/choosing-your-runtime-image
+      # runtime:
+      #   registry: docker
+      #   sourceRepository: apps-docker-local
+      #   name: test.mycompany.io/apps-docker-local/ci/builder-node14
+      #   tag: 1.0.0
 
       commands:
         # [Maven] Default to plugin: maven-checkstyle-plugin
@@ -133,7 +150,6 @@ configurations:
 controls:
   
   # [Optional] Feature to control the pipeline trigger options, defaults to `sourceRepository`
-  # Whole pipeline from frogbot-scan will be triggered
   triggerBy:
     
     # Connected source Git repository change [Defaults to true]
