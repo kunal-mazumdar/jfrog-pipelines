@@ -360,7 +360,7 @@ pipelines:
       - name: code_quality
         type: {{ $stepType }}
         configuration:
-          {{ template "step.shared.runtime" $isQualityEnabled }}
+          {{ template "step.shared.runtime" .Values.configuration.codeQuality }}
           inputSteps:
             - name: trigger_all
           inputResources:
@@ -377,7 +377,7 @@ pipelines:
       - name: unit_tests
         type: {{ $stepType }}
         configuration:
-          {{ template "step.shared.runtime" $isTestEnabled }}
+          {{ template "step.shared.runtime" .Values.configuration.test }}
           inputSteps:
             - name: trigger_all
           inputResources:
@@ -395,7 +395,7 @@ pipelines:
         type: {{ $stepType }}
         configuration:
           affinityGroup: build
-          {{ template "step.shared.runtime" $isLintEnabled }}
+          {{ template "step.shared.runtime" .Values.configuration.lint }}
           inputSteps:
             - name: trigger_all
           inputResources:
@@ -412,7 +412,7 @@ pipelines:
       - name: build
         type: {{ $stepType }}
         configuration:
-          {{ template "step.shared.runtime" $isBuildEnabled }}
+          {{ template "step.shared.runtime" .Values.configuration.build }}
           affinityGroup: build
           inputSteps:
             {{ if $isLintEnabled }}
@@ -433,7 +433,7 @@ pipelines:
       - name: publish
         type: {{ $stepType }}
         configuration:
-          {{ template "step.shared.runtime" $isPublishEnabled }}
+          {{ template "step.shared.runtime" .Values.configuration.publish }}
           affinityGroup: build
           inputSteps:
             {{ if $isBuildEnabled }}
@@ -463,7 +463,7 @@ pipelines:
       - name: xray_scan
         type: XrayScan
         configuration:
-          {{ template "step.shared.runtime" $isXrayScanEnabled }}
+          {{ template "step.shared.runtime" .Values.configuration.xrayScan }}
           failOnScan: {{ default false .Values.configurations.steps.xrayScan.failOnScan }}
           inputResources:
             - name: {{ $buildInfoResName }}
