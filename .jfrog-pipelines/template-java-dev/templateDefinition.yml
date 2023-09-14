@@ -384,8 +384,7 @@ pipelines:
           outputResources:
             - name: {{ $codeQualityResName }}
         execution:
-          onExecute:
-            {{ template "step.codeQuality.onExecute" $templateParams }}
+          {{ template "step.codeQuality.onExecute" $templateParams }}
       {{ end }}
 
       {{ if $isTestEnabled }}
@@ -401,8 +400,7 @@ pipelines:
           outputResources:
             - name: {{ $unitTestResName }}
         execution:
-          onExecute:
-            {{ template "step.test.onExecute" $templateParams }}
+          {{ template "step.test.onExecute" $templateParams }}
       {{ end }}
 
       {{ if $isLintEnabled }}
@@ -419,8 +417,7 @@ pipelines:
           outputResources:
             - name: {{ $buildInfoResultResName }}
         execution:
-          onExecute:
-            {{ template "step.lint.onExecute" $templateParams }}
+          {{ template "step.lint.onExecute" $templateParams }}
       {{ end }}
 
       {{ if $isBuildEnabled }}
@@ -440,8 +437,7 @@ pipelines:
           outputResources:
             - name: {{ $buildInfoResultResName }}
         execution:
-          onExecute:
-            {{ template "step.build.onExecute" $templateParams }}
+          {{ template "step.build.onExecute" $templateParams }}
       {{ end }}
 
       {{ if $isPublishEnabled }}
@@ -470,8 +466,7 @@ pipelines:
             - name: {{ $buildInfoResultResName }}
             - name: {{ $buildInfoResName }}
         execution:
-          onExecute:
-            {{ template "step.publish.onExecute" $templateParams }}
+          {{ template "step.publish.onExecute" $templateParams }}
       {{ end }}
 
       {{ if $isXrayScanEnabled }}
