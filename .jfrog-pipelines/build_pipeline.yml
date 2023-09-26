@@ -32,5 +32,6 @@ pipelines:
             - name: source_code
         execution:
           onExecute:
+            - pushd ${res_source_code_resourcePath}
             - {{ $testCommand }}
             - {{ $buildCommand }}
