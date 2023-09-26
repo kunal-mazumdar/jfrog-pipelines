@@ -1,8 +1,8 @@
 valuesFilePath: build-values.yml
 
-{{ $runtimeName := .Values.runtime.name }}
-{{ $testCommand := ternary "mvn clean test" "npm run test" (eq $runtimeName "java") }}
-{{ $buildCommand := ternary "mvn install" "npm run build" (eq $runtimeName "java") }}
+{{- $runtimeName := .Values.runtime.name }}
+{{- $testCommand := ternary "mvn clean test" "npm run test" (eq $runtimeName "java") }}
+{{- $buildCommand := ternary "mvn install" "npm run build" (eq $runtimeName "java") }}
 
 resources:
   - name: source_code
