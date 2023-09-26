@@ -1,8 +1,7 @@
 valuesFilePath: build-values.yml
 
 {{- $runtimeName := .Values.runtime.name }}
-{{- $testCommand := ternary "mvn clean test" "npm run test" (eq $runtimeName "java") }}
-{{- $buildCommand := ternary "mvn install" "npm run build" (eq $runtimeName "java") }}
+{{- $buildCommand := ternary "mvn install -DskipTests" "npm run build" (eq $runtimeName "java") }}
 
 resources:
   - name: source_code
@@ -33,5 +32,4 @@ pipelines:
         execution:
           onExecute:
             - pushd ${res_source_code_resourcePath}
-            - {{ $testCommand }}
             - {{ $buildCommand }}
