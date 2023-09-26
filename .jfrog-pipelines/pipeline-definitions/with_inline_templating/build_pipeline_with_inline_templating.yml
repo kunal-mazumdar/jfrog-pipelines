@@ -1,7 +1,8 @@
 valuesFilePath: values.yml
 
 {{- $runtimeName := .Values.runtime.name }}
-{{- $gitResource := print .Values.appName "_source_code" }}
+{{- $appName := .Values.appName }}
+{{- $gitResource := print $appName "_source_code" }}
 {{- $buildCommand := ternary "mvn install -DskipTests" "npm run build" (eq $runtimeName "java") }}
 
 resources:
@@ -12,7 +13,7 @@ resources:
       gitProvider: {{ .Values.sourceCode.authIntegration }}
 
 pipelines:
-  - name: {{ $runtimeName }}_build
+  - name: {{ $appName }}_{{ $runtimeName }}_build
     configuration:
       jfrogCliVersion: 2
       runtime:

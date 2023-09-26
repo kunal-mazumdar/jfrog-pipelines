@@ -6,7 +6,7 @@ resources:
       gitProvider: github_auth
 
 pipelines:
-  - name: starter_java_build
+  - name: classic_starter_app_java_build
     configuration:
       jfrogCliVersion: 2
       runtime:
