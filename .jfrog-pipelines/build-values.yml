@@ -11,4 +11,4 @@ runtime:
 
   # [Required] Version according to language
   versions:
-    - "8"
+    - "11"
