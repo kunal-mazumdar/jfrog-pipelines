@@ -6,7 +6,7 @@ valuesFilePath: build-values.yml
 
 resources:
   - name: source_code
-    type: gitRepo
+    type: GitRepo
     configuration:
       path: {{ .Values.sourceCode.repoPath }}
       gitProvider: {{ .Values.sourceCode.authIntegration }}

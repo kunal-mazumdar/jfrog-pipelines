@@ -1,6 +1,6 @@
 resources:
   - name: java_source_code
-    type: gitRepo
+    type: GitRepo
     configuration:
       path: kunal-mazumdar/simple-java-maven-app
       gitProvider: github_auth
