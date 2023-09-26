@@ -1,5 +1,0 @@
-version: 1
-type: gradle
-deployer:
-  snapshotRepo: test-automation-gradle-local
-  serverID: s_artifactory

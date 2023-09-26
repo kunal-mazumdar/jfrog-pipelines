@@ -1,0 +1,28 @@
+resources:
+  - name: java_source_code
+    type: gitRepo
+    configuration:
+      path: kunal-mazumdar/simple-java-maven-app
+      gitProvider: github_auth
+
+pipelines:
+  - name: starter_java_build
+    configuration:
+      jfrogCliVersion: 2
+      runtime:
+        type: image
+        image:
+          auto:
+            language: java
+            versions:
+              - "8"
+    steps:
+      - name: build
+        type: Bash
+        configuration:
+          inputResources:
+            - name: java_source_code
+        execution:
+          onExecute:
+            - mvn clean test
+            - mvn build

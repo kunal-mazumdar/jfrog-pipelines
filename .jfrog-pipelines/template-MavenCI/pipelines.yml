@@ -1,4 +1,0 @@
-valuesFilePath: ./values.yml
-
-include:
-  template: jfrog/MavenCI/1.0.0

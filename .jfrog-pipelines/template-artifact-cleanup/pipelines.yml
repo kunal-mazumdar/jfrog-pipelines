@@ -1,4 +1,0 @@
-valuesFilePath: values.yml
-
-include:
-  template: kunal/artifactCleanup/1.1.1
