@@ -1,0 +1,37 @@
+templateRepository:
+  # scm integration name
+  gitProvider: github_auth
+
+  # repository path where your templates are present
+  path: kunal-mazumdar/jfrog-pipelines
+
+  # branch name or pattern where your templates are present in the repository (optional)
+  branch: intro-to-templates
+
+  # template folder location, where your templateDefinition.yml file is present
+  templateFolder: .jfrog-pipelines/template-definitions/demo/starter-ci
+
+  # when set to true and branch is also defined, then auto triggers the publish pipeline upon commit. (optional)
+  autoPublishOnTemplateChange: false
+
+publishTemplate:
+  # Template namespace
+  namespace: demo
+
+  # Template name
+  name: starter-ci
+
+  # Template version
+  version: 1.0.0
+
+  # JFrog platform access token integration name
+  jfrogAccessTokenIntegration: rt_auth
+
+  # name of the pipeline (optional)
+  pipelineName: publish_java_build_template
+
+  # template repository resource name (optional)
+  templateRepositoryResourceName: java_build_template_repo
+
+  # upload status resource name (optional)
+  templateUploadStatusResourceName: java_build_template_publish_status

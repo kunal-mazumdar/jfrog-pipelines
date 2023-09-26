@@ -1,4 +1,0 @@
-valuesFilePath: build-values.yml
-
-include:
-  template: demo/starter-ci/0.0.1

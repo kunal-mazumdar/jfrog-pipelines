@@ -1,7 +1,7 @@
 template:
   namespace: demo
   name: starter-ci
-  version: 0.0.1
+  version: 1.0.0-dev
   development: true
 
 {{- $runtimeName := .Values.runtime.name }}

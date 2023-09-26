@@ -1,3 +1,5 @@
+appName: java_starter_4
+
 sourceCode:
   # [Required] Git repo path
   repoPath: kunal-mazumdar/simple-java-maven-app

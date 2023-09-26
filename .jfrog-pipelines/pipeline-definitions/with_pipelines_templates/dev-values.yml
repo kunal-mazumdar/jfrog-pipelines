@@ -1,0 +1,16 @@
+appName: java_starter_2
+
+sourceCode:
+  # [Required] Git repo path
+  repoPath: kunal-mazumdar/simple-java-maven-app
+
+  # [Required] Git integration name
+  authIntegration: github_auth
+
+runtime:
+  # [Optional] java/node, defaults to java
+  name: java
+
+  # [Required] Version according to language
+  versions:
+    - "11"
