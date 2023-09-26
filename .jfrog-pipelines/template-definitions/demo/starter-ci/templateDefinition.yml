@@ -4,18 +4,20 @@ template:
   version: 1.0.0-dev
   development: true
 
+{{- $appName := Values.appName }}
 {{- $runtimeName := .Values.runtime.name }}
+{{- $gitResource := print $appName "_source_code" }}
 {{- $buildCommand := ternary "mvn install -DskipTests" "npm run build" (eq $runtimeName "java") }}
 
 resources:
-  - name: source_code
+  - name: {{ $gitResource }}
     type: GitRepo
     configuration:
       path: {{ .Values.sourceCode.repoPath }}
       gitProvider: {{ .Values.sourceCode.authIntegration }}
 
 pipelines:
-  - name: {{ $runtimeName }}_build
+  - name: {{ $appName }}_{{ $runtimeName }}_build
     configuration:
       jfrogCliVersion: 2
       runtime:
@@ -32,8 +34,8 @@ pipelines:
         type: Bash
         configuration:
           inputResources:
-            - name: source_code
+            - name: {{ $gitResource }}
         execution:
           onExecute:
-            - pushd ${res_source_code_resourcePath}
+            - pushd ${res_{{ $gitResource }}_resourcePath}
             - {{ $buildCommand }}
