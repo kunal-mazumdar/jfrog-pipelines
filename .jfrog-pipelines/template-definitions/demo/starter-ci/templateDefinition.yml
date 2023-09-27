@@ -1,3 +1,5 @@
+valuesFilePath: values.yml.example
+
 template:
   namespace: demo
   name: starter-ci
