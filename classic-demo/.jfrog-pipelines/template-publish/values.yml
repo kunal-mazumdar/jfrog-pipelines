@@ -9,7 +9,7 @@ templateRepository:
   branch: intro-to-templates
 
   # template folder location, where your templateDefinition.yml file is present
-  templateFolder: .jfrog-pipelines/template-definitions/demo/starter-ci
+  templateFolder: classic-demo/.jfrog-pipelines/template-definitions/demo/starter-ci
 
   # when set to true and branch is also defined, then auto triggers the publish pipeline upon commit. (optional)
   autoPublishOnTemplateChange: false
