@@ -1,0 +1,29 @@
+valuesFilePath: values.yml
+
+{{- $runtimeName := .Values.runtime.name }}
+{{- $appName := .Values.appName }}
+{{- $gitResource := print $appName "_source_code" }}
+
+resources:
+  - name: {{ $gitResource }}
+    type: GitRepo
+    configuration:
+      path: {{ .Values.sourceCode.repoPath }}
+      gitProvider: {{ .Values.sourceCode.authIntegration }}
+
+pipelines:
+  - name: {{ $appName }}_{{ $runtimeName }}_build
+    configuration:
+      jfrogCliVersion: 2
+      runtime:
+        type: image
+        image:
+          auto:
+            language: {{ $runtimeName }}
+            versions:
+              {{- range $version := .Values.runtime.versions }}
+              - {{ $version }}
+              {{- end }}
+    steps:
+      {{- $params := dict "runtimeName" $runtimeName "gitResource" $gitResource }}
+      {{ include "standard.build.step" $params }}
