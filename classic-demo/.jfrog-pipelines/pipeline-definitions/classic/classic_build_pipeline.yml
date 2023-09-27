@@ -24,4 +24,5 @@ pipelines:
             - name: java_source_code
         execution:
           onExecute:
+            - pushd ${res_java_source_code_resourcePath}
             - mvn install -DskipTests
