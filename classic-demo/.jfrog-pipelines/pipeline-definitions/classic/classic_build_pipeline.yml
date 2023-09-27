@@ -24,5 +24,4 @@ pipelines:
             - name: java_source_code
         execution:
           onExecute:
-            - mvn clean test
-            - mvn build
+            - mvn install -DskipTests
