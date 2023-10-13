@@ -1,3 +1,4 @@
+# STARTER CI TEMPLATE DEFINITION
 template:
   namespace: demo
   name: starter-ci
