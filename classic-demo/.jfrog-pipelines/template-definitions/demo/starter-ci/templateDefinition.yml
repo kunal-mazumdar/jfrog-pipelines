@@ -1,9 +1,9 @@
 # STARTER CI TEMPLATE DEFINITION
-template:
-  namespace: demo
-  name: starter-ci
-  version: 1.0.0-dev
-  development: true
+# template:
+#   namespace: demo
+#   name: starter-ci
+#   version: 1.0.0-dev
+#   development: true
 
 {{- $appName := .Values.appName }}
 {{- $runtimeName := .Values.runtime.name }}
