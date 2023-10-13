@@ -1,4 +1,4 @@
 valuesFilePath: ./prod-values.yml
 
 include:
-  template: demo/starter-ci/1.0.0-dev
+  template: demo/starter-ci/1.0.0
